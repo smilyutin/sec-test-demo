@@ -1,4 +1,5 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect, Page } from '@playwright/test';
+
 
 test.describe('/#/ (Mass Assignment via Registration Form)', () => {
   test.beforeEach(async ({ page }) => {

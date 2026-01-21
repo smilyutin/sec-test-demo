@@ -21,7 +21,7 @@ test.describe('Full Exploit Chain Tests', () => {
     console.log('✓ Full chain: SQL injection → Admin access');
   });
 
-  test('should exploit multiple vulnerabilities in sequence', async ({ page }: { page: Page }) => {
+  test('should exploit multiple vulnerabilities in sequence', async ({ page }) => {
     // 1. SQL Injection
     await page.fill('#username', "admin'--");
     await page.fill('#password', 'hramos');
@@ -43,7 +43,7 @@ test.describe('Full Exploit Chain Tests', () => {
     console.log('✓ Multiple vulnerabilities exploited in sequence');
   });
 
-  test('should demonstrate full penetration testing workflow', async ({ page }: { page: Page }) => {
+  test('should demonstrate full penetration testing workflow', async ({ page }) => {
     console.log('Starting penetration test workflow:');
     
     // Reconnaissance: Expose config

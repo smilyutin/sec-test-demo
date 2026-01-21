@@ -1,4 +1,5 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect, Page } from '@playwright/test';
+
 
 test.describe('/#/ (Sensitive Data Exposure via Config Button)', () => {
   test.beforeEach(async ({ page }) => {
