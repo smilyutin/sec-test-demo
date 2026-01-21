@@ -1,4 +1,5 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect, Page } from '@playwright/test';
+
 
 test.describe('/#/ (Broken Authentication via Admin Access)', () => {
   test.beforeEach(async ({ page }) => {
@@ -38,7 +39,7 @@ test.describe('/#/ (Broken Authentication via Admin Access)', () => {
       await page.waitForSelector('#adminResult.show', { timeout: 5000 });
       
       const adminResult = await page.locator('#adminResult').textContent();
-      console.log('Admin access result:', adminResult.substring(0, 100));
+      console.log('Admin access result:', (adminResult ?? '').substring(0, 100));
     }
   });
 

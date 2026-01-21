@@ -5,7 +5,7 @@ test.describe('/#/ (IDOR via User Data Form)', () => {
     await page.goto('/');
   });
 
-  test('should access user 1 data without authentication', async ({ page }: { page: Page }) => {
+  test('should access user 1 data without authentication', async ({ page }) => {
     await page.fill('#userId', '1');
     await page.click('#idorForm button[type="submit"]');
     
@@ -19,7 +19,7 @@ test.describe('/#/ (IDOR via User Data Form)', () => {
     console.log('✓ IDOR - Accessed user 1 data via UI');
   });
 
-  test('should access user 2 data without authentication', async ({ page }: { page: Page }) => {
+  test('should access user 2 data without authentication', async ({ page }) => {
     await page.fill('#userId', '2');
     await page.click('#idorForm button[type="submit"]');
     
@@ -31,7 +31,7 @@ test.describe('/#/ (IDOR via User Data Form)', () => {
     console.log('✓ IDOR - Accessed user 2 data via UI');
   });
 
-  test('should expose admin secret data', async ({ page }: { page: Page }) => {
+  test('should expose admin secret data', async ({ page }) => {
     await page.fill('#userId', '1');
     await page.click('#idorForm button[type="submit"]');
     
@@ -44,7 +44,7 @@ test.describe('/#/ (IDOR via User Data Form)', () => {
     console.log('✓ IDOR - Admin secret data exposed in UI');
   });
 
-  test('should enumerate users by changing ID', async ({ page }: { page: Page }) => {
+  test('should enumerate users by changing ID', async ({ page }) => {
     const userIds = ['1', '2', '3'];
     
     for (const id of userIds) {
