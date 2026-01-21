@@ -1,0 +1,4 @@
+// Add to .gitignore
+test-results/
+playwright-report/
+playwright/.cache/
