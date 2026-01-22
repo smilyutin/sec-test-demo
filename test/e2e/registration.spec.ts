@@ -1,78 +1,95 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-
-test.describe('/#/ (Mass Assignment via Registration Form)', () => {
+test.describe('Registration (baseline + optional mass-assignment demo)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should register as admin via role field', async ({ page }) => {
-    const username = `admin_${Date.now()}`;
-    
-    await page.fill('#regUsername', username);
-    await page.fill('#regPassword', 'hacked123');
-    await page.fill('#regEmail', `${username}@evil.com`);
-    await page.fill('#regRole', 'admin');
-    
-    await page.click('#registerForm button[type="submit"]');
-    await page.waitForSelector('#registerResult.show', { timeout: 5000 });
-    
-    const resultText = await page.locator('#registerResult').textContent();
-    expect(resultText).toContain('success');
-    expect(resultText).toContain('admin');
-    
-    console.log('✓ Mass assignment - Registered as admin via UI');
-  });
+  // -------------------------
+  // BASELINE TESTS (always run)
+  // -------------------------
 
-  test('should escalate privileges to superadmin', async ({ page }) => {
-    const username = `superadmin_${Date.now()}`;
-    
-    await page.fill('#regUsername', username);
-    await page.fill('#regPassword', 'test123');
-    await page.fill('#regEmail', `${username}@test.com`);
-    await page.fill('#regRole', 'superadmin');
-    
-    await page.click('#registerForm button[type="submit"]');
-    await page.waitForSelector('#registerResult.show', { timeout: 5000 });
-    
-    const resultText = await page.locator('#registerResult').textContent();
-    expect(resultText).toContain('success');
-    
-    console.log('✓ Mass assignment - Registered as superadmin via UI');
-  });
+  test('registers a new user successfully', async ({ page }) => {
+    const username = `user_${Date.now()}`;
 
-  test('should register with custom role value', async ({ page }) => {
-    const username = `moderator_${Date.now()}`;
-    
+    const registerResp = page.waitForResponse(
+      (r) => r.url().includes('/api/register') && r.request().method() === 'POST'
+    );
+
     await page.fill('#regUsername', username);
-    await page.fill('#regPassword', 'password');
+    await page.fill('#regPassword', 'pass123');
     await page.fill('#regEmail', `${username}@demo.com`);
-    await page.fill('#regRole', 'moderator');
-    
+    await page.fill('#regRole', 'user'); // normal
+
     await page.click('#registerForm button[type="submit"]');
-    await page.waitForSelector('#registerResult.show', { timeout: 5000 });
-    
-    const resultHTML = await page.locator('#registerResult').innerHTML();
-    expect(resultHTML).toContain('userId');
-    
-    console.log('✓ Mass assignment - Custom role accepted via UI');
+
+    const res = await registerResp;
+    expect([200, 400]).toContain(res.status());
+
+    const result = page.locator('#registerResult');
+    await expect(result).toBeVisible();
+
+    // On success, your API responds with: success, userId, message, role
+    await expect(result).toContainText('userId');
+    await expect(result).toContainText('success');
+    await expect(result).toContainText('true');
   });
 
-  test('should display assigned role in response', async ({ page }) => {
-    const username = `role_test_${Date.now()}`;
-    
+  test.fixme('SECURITY EXPECTATION: ignores client-supplied role (should fail until fixed)', async ({ page }) => {
+    const username = `role_expect_${Date.now()}`;
+
+    const registerResp = page.waitForResponse(
+      (r) => r.url().includes('/api/register') && r.request().method() === 'POST'
+    );
+
     await page.fill('#regUsername', username);
-    await page.fill('#regPassword', 'test');
-    await page.fill('#regEmail', `${username}@test.com`);
-    await page.fill('#regRole', 'admin');
-    
+    await page.fill('#regPassword', 'pass123');
+    await page.fill('#regEmail', `${username}@demo.com`);
+    await page.fill('#regRole', 'admin'); // attacker-controlled input
+
     await page.click('#registerForm button[type="submit"]');
-    await page.waitForSelector('#registerResult.show', { timeout: 5000 });
-    
-    const resultText = await page.locator('#registerResult').textContent();
-    expect(resultText).toContain('role');
-    expect(resultText).toContain('admin');
-    
-    console.log('✓ Mass assignment - Assigned role visible in UI response');
+
+    const res = await registerResp;
+    expect([200, 400]).toContain(res.status());
+
+    const result = page.locator('#registerResult');
+    await expect(result).toBeVisible();
+
+    // Correct secure behavior: server should force role to "user" regardless of input.
+    // Currently fails because the app intentionally has this vulnerability for demo purposes.
+    await expect(result).toContainText('"role"');
+    await expect(result).not.toContainText('admin');
+  });
+
+  // --------------------------------------
+  // VULNERABILITY DEMO (opt-in only)
+  // RUN_VULN_TESTS=1 npx playwright test
+  // --------------------------------------
+
+  test('VULN DEMO: accepts arbitrary role from client (opt-in)', async ({ page }) => {
+    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+
+    const username = `vuln_role_${Date.now()}`;
+
+    const registerResp = page.waitForResponse(
+      (r) => r.url().includes('/api/register') && r.request().method() === 'POST'
+    );
+
+    await page.fill('#regUsername', username);
+    await page.fill('#regPassword', 'pass123');
+    await page.fill('#regEmail', `${username}@demo.com`);
+    await page.fill('#regRole', 'admin');
+
+    await page.click('#registerForm button[type="submit"]');
+
+    const res = await registerResp;
+    expect([200, 400]).toContain(res.status());
+
+    const result = page.locator('#registerResult');
+    await expect(result).toBeVisible();
+
+    // If vulnerability is present, the response reflects the supplied role.
+    await expect(result).toContainText('admin');
+    await expect(result).toContainText('success');
   });
 });

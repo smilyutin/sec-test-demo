@@ -1,6 +1,6 @@
 import { Page } from "playwright-core";
 import { test, expect } from '@playwright/test';
-
+//RUN_VULN_TESTS=1 npx playwright test test/e2e/vulnerabilities.spec.ts
 test.describe('Full Exploit Chain Tests', () => {
   test.beforeEach(async ({ page }: { page: Page }) => {
     await page.goto('/');
