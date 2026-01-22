@@ -1,58 +1,63 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-
-test.describe('/#/ (Broken Authentication via Admin Access)', () => {
+test.describe('Broken Authentication (Admin Access)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should attempt admin access without token', async ({ page }) => {
+  test('denies admin access when token is missing', async ({ page }) => {
     await page.fill('#adminToken', '');
     await page.click('#adminForm button[type="submit"]');
-    
-    await page.waitForSelector('#adminResult.show', { timeout: 5000 });
-    
-    const resultText = await page.locator('#adminResult').textContent();
-    expect(resultText).toContain('error');
-    
-    console.log('✓ Admin access denied without token (expected)');
+
+    const adminResult = page.locator('#adminResult');
+    await expect(adminResult).toBeVisible(); // result.show in UI
+    await expect(adminResult).toContainText('error');
   });
 
-  test('should access admin panel with valid token from SQL injection', async ({ page }) => {
-    // First get a token via SQL injection
-    await page.fill('#username', "admin' OR '1'='1'--");
-    await page.fill('#password', 'anything');
+  test('stores token in localStorage after normal login', async ({ page }) => {
+    // Use normal credentials from server.js seed data (user1/password)
+    await page.fill('#username', 'user1');
+    await page.fill('#password', 'password');
     await page.click('#loginForm button[type="submit"]');
-    
-    await page.waitForSelector('#loginResult.show', { timeout: 5000 });
-    
-    const loginResult = await page.locator('#loginResult').textContent();
-    
-    // Extract token from response (it's stored in localStorage by the frontend)
+
+    const loginResult = page.locator('#loginResult');
+    await expect(loginResult).toBeVisible();
+    await expect(loginResult).toContainText('"success"');
+
     const token = await page.evaluate(() => localStorage.getItem('token'));
-    
-    if (token) {
-      console.log('✓ Token obtained via SQL injection');
-      
-      // Now try admin access
-      await page.click('#adminForm button[type="submit"]');
-      await page.waitForSelector('#adminResult.show', { timeout: 5000 });
-      
-      const adminResult = await page.locator('#adminResult').textContent();
-      console.log('Admin access result:', (adminResult ?? '').substring(0, 100));
-    }
+    expect(token, 'Expected token to be stored in localStorage after login').toBeTruthy();
   });
 
-  test('should show weak JWT verification in UI', async ({ page }) => {
-    // Test with a forged token in the input field
-    const fakeToken = 'eyJhbGciOiJub25lIn0.eyJyb2xlIjoiYWRtaW4ifQ.';
-    
-    await page.fill('#adminToken', fakeToken);
+  test('denies admin access with a non-admin token (expected behavior after fix)', async ({ page }) => {
+    // Get a normal user token
+    await page.fill('#username', 'user1');
+    await page.fill('#password', 'password');
+    await page.click('#loginForm button[type="submit"]');
+
+    await expect(page.locator('#loginResult')).toBeVisible();
+
+    // Leave token field empty so UI uses localStorage token
+    await page.fill('#adminToken', '');
     await page.click('#adminForm button[type="submit"]');
-    
-    await page.waitForSelector('#adminResult.show', { timeout: 5000 });
-    
-    const resultText = await page.locator('#adminResult').textContent();
-    console.log('✓ JWT forgery attempt via UI completed');
+
+    const adminResult = page.locator('#adminResult');
+    await expect(adminResult).toBeVisible();
+
+    // Today your backend may still block this (403) — which is fine.
+    // This assertion expresses the *correct* security expectation.
+    await expect(adminResult).toContainText('error');
+  });
+
+  test('admin access should require verified JWT (regression expectation)', async ({ page }) => {
+    // This is intentionally written as a “security expectation” test.
+    // If the server incorrectly accepts unverified tokens, this test should FAIL until fixed.
+    const suspiciousToken = 'dummy.invalid.token';
+
+    await page.fill('#adminToken', suspiciousToken);
+    await page.click('#adminForm button[type="submit"]');
+
+    const adminResult = page.locator('#adminResult');
+    await expect(adminResult).toBeVisible();
+    await expect(adminResult).toContainText('error'); // should not grant admin
   });
 });

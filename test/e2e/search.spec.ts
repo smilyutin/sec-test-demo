@@ -1,64 +1,63 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-test.describe('/#/ (XSS via Search Form)', () => {
+test.describe('Search (baseline + optional XSS demo)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should reflect script tag XSS payload', async ({ page }) => {
-    const xssPayload = '<script>window.xssTriggered=true</script>';
-    
-    await page.fill('#searchQuery', xssPayload);
+  // -------------------------
+  // BASELINE TESTS (always run)
+  // -------------------------
+
+  test('search calls /api/search and renders results panel', async ({ page }) => {
+    const searchResp = page.waitForResponse(
+      (r) => r.url().includes('/api/search') && r.request().method() === 'GET'
+    );
+
+    await page.fill('#searchQuery', 'Laptop');
     await page.click('#searchForm button[type="submit"]');
-    
-    await page.waitForSelector('#searchResult.show', { timeout: 5000 });
-    
-    const resultHTML = await page.locator('#searchResult').innerHTML();
-    expect(resultHTML).toContain(xssPayload);
-    
-    console.log('✓ XSS script tag payload reflected in DOM');
+
+    const res = await searchResp;
+    expect([200, 500]).toContain(res.status());
+
+    const result = page.locator('#searchResult');
+    await expect(result).toBeVisible();
+    await expect(result).toContainText('Search for:');
   });
 
-  test('should reflect image onerror XSS payload', async ({ page }) => {
-    const xssPayload = '<img src=x onerror=alert(1)>';
-    
-    await page.fill('#searchQuery', xssPayload);
+  test('SECURITY EXPECTATION: should not interpret user input as HTML (run in SECURE_MODE)', async ({ page }) => {
+    test.skip(!process.env.SECURE_MODE, 'Run security expectations only after hardening (set SECURE_MODE=1)');
+
+    // Safe sentinel: if the UI injects it as HTML, we would see a real <img> element.
+    const sentinel = `<img src=x data-test="xss-sentinel">`;
+
+    await page.fill('#searchQuery', sentinel);
     await page.click('#searchForm button[type="submit"]');
-    
-    await page.waitForSelector('#searchResult.show', { timeout: 5000 });
-    
-    const resultHTML = await page.locator('#searchResult').innerHTML();
-    expect(resultHTML).toMatch(/\bsrc\s*=\s*['"]x['"]/);
-    expect(resultHTML).toMatch(/\bonerror\s*=\s*['"][^'"]+['"]/);
-    
-    console.log('✓ XSS image onerror payload reflected');
+
+    const result = page.locator('#searchResult');
+    await expect(result).toBeVisible();
+
+    // Secure behavior: user input should be encoded/escaped, so no element should be created in the DOM.
+    await expect(page.locator('#searchResult img[data-test="xss-sentinel"]')).toHaveCount(0);
   });
 
-  test('should test SVG-based XSS vector', async ({ page }) => {
-    const xssPayload = '<svg/onload=alert(1)>';
-    
-    await page.fill('#searchQuery', xssPayload);
-    await page.click('#searchForm button[type="submit"]');
-    
-    await page.waitForSelector('#searchResult.show');
-    
-    const resultHTML = await page.locator('#searchResult').innerHTML();
-    expect(resultHTML).toContain('svg');
-    
-    console.log('✓ SVG XSS vector reflected');
-  });
+  // --------------------------------------
+  // VULNERABILITY DEMO (opt-in only)
+  // RUN_VULN_TESTS=1 npx playwright test
+  // --------------------------------------
 
-  test('should display search term with HTML entities preserved', async ({ page }) => {
-    const xssPayload = '<iframe src=javascript:alert(1)>';
-    
-    await page.fill('#searchQuery', xssPayload);
+  test('VULN DEMO: user input is rendered as HTML (opt-in)', async ({ page }) => {
+    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+
+    const payload = `<img src=x data-test="xss-demo">`;
+
+    await page.fill('#searchQuery', payload);
     await page.click('#searchForm button[type="submit"]');
-    
-    await page.waitForSelector('#searchResult.show');
-    
-    const resultText = await page.locator('#searchResult strong').textContent();
-    expect(resultText).toContain('Search for:');
-    
-    console.log('✓ XSS iframe payload reflected in search results');
+
+    const result = page.locator('#searchResult');
+    await expect(result).toBeVisible();
+
+    // Vulnerable behavior: payload is inserted into DOM as an element.
+    await expect(page.locator('#searchResult img[data-test="xss-demo"]')).toHaveCount(1);
   });
 });

@@ -9,6 +9,8 @@
     "test": "npm run test:api && npm run test:e2e",
     "test:api": "playwright test test/api",
     "test:e2e": "playwright test test/e2e",
+    "test:vuln": "cross-env RUN_VULN_TESTS=1 playwright test test/e2e",
+    "test:secure": "cross-env SECURE_MODE=1 playwright test test/e2e",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:report": "playwright show-report"
@@ -32,6 +34,7 @@
     "@playwright/test": "^1.40.0",
     "@types/node": "^20.19.30",
     "nodemon": "^3.0.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "cross-env": "^7.0.3"
   }
 }

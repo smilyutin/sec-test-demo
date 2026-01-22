@@ -34,6 +34,13 @@ jobs:
 
     - name: Run tests (API + E2E)
       run: npm test
+      env:
+        # IMPORTANT: Never set RUN_VULN_TESTS=1 in CI
+        # Exploit demonstrations are opt-in only for local development
+        CI: true
+        # Explicitly disable vulnerability demonstrations in CI
+        RUN_VULN_TESTS: ''
+        SECURE_MODE: ''
 
     - name: Upload Playwright report
       if: always()

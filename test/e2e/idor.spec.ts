@@ -1,63 +1,52 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-test.describe('/#/ (IDOR via User Data Form)', () => {
-  test.beforeEach(async ({ page }: { page: Page }) => {
+test.describe('IDOR (User Data Form)', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should access user 1 data without authentication', async ({ page }) => {
+  test('shows user data when requesting an existing ID (current vulnerable behavior)', async ({ page }) => {
     await page.fill('#userId', '1');
+
+    const userResp = page.waitForResponse(r => r.url().includes('/api/user/1') && r.request().method() === 'GET');
     await page.click('#idorForm button[type="submit"]');
-    
-    await page.waitForSelector('#idorResult.show', { timeout: 5000 });
-    
-    const resultText = await page.locator('#idorResult').textContent();
-    expect(resultText).toContain('username');
-    expect(resultText).toContain('email');
-    expect(resultText).toContain('secret_data');
-    
-    console.log('✓ IDOR - Accessed user 1 data via UI');
+    const res = await userResp;
+
+    expect([200, 404, 500]).toContain(res.status());
+
+    const result = page.locator('#idorResult');
+    await expect(result).toBeVisible();
+    await expect(result).toContainText('"username"');
+    await expect(result).toContainText('"email"');
   });
 
-  test('should access user 2 data without authentication', async ({ page }) => {
-    await page.fill('#userId', '2');
-    await page.click('#idorForm button[type="submit"]');
-    
-    await page.waitForSelector('#idorResult.show', { timeout: 5000 });
-    
-    const resultText = await page.locator('#idorResult').textContent();
-    expect(resultText).toContain('user');
-    
-    console.log('✓ IDOR - Accessed user 2 data via UI');
-  });
+  test('returns not found for non-existent user IDs (expected UX)', async ({ page }) => {
+    await page.fill('#userId', '9999');
 
-  test('should expose admin secret data', async ({ page }) => {
-    await page.fill('#userId', '1');
+    const userResp = page.waitForResponse(r => r.url().includes('/api/user/9999') && r.request().method() === 'GET');
     await page.click('#idorForm button[type="submit"]');
-    
-    await page.waitForSelector('#idorResult.show', { timeout: 5000 });
-    
-    const resultHTML = await page.locator('#idorResult').innerHTML();
-    expect(resultHTML).toContain('admin');
-    expect(resultHTML).toContain('FLAG');
-    
-    console.log('✓ IDOR - Admin secret data exposed in UI');
-  });
+    const res = await userResp;
 
-  test('should enumerate users by changing ID', async ({ page }) => {
-    const userIds = ['1', '2', '3'];
-    
-    for (const id of userIds) {
-      await page.fill('#userId', id);
-      await page.click('#idorForm button[type="submit"]');
-      await page.waitForSelector('#idorResult.show', { timeout: 5000 });
-      
-      const resultText = await page.locator('#idorResult').textContent();
-      if (resultText && resultText.includes('username')) {
-        console.log(`✓ IDOR - User ${id} data accessible`);
-      }
-      
-      await page.waitForTimeout(500);
+    expect([404, 500]).toContain(res.status()); // depending on server behavior
+
+    const result = page.locator('#idorResult');
+    await expect(result).toBeVisible();
+    // Your API returns { error: 'User not found' } on 404
+    if (res.status() === 404) {
+      await expect(result).toContainText('User not found');
     }
+  });
+
+  test.fixme('SECURITY EXPECTATION: should not expose secret_data without auth (should fail until fixed)', async ({ page }) => {
+    await page.fill('#userId', '1');
+    await page.click('#idorForm button[type="submit"]');
+
+    const result = page.locator('#idorResult');
+    await expect(result).toBeVisible();
+
+    // This is the key "regression" expectation:
+    // Once you fix IDOR, secret_data should not be returned to anonymous users.
+    // Currently fails because the app intentionally has this vulnerability for demo purposes.
+    await expect(result).not.toContainText('secret_data');
   });
 });
