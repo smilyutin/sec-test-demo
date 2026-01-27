@@ -3,10 +3,9 @@ import { test, expect } from '@playwright/test';
 //npx playwright test test/e2e/login.spec.ts
 //RUN_VULN_TESTS=1 npx playwright test test/e2e/login.spec.ts
 
-test.describe('Login (baseline + optional vulnerability demo)', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+});
 
   // -------------------------
   // BASELINE TESTS (always run)
@@ -78,4 +77,3 @@ test.describe('Login (baseline + optional vulnerability demo)', () => {
     const token = await page.evaluate(() => localStorage.getItem('token'));
     expect(token).toBeTruthy();
   });
-});

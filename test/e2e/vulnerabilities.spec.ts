@@ -1,10 +1,10 @@
 import { Page } from "playwright-core";
 import { test, expect } from '@playwright/test';
 //RUN_VULN_TESTS=1 npx playwright test test/e2e/vulnerabilities.spec.ts
-test.describe('Full Exploit Chain Tests', () => {
-  test.beforeEach(async ({ page }: { page: Page }) => {
-    await page.goto('/');
-  });
+
+test.beforeEach(async ({ page }: { page: Page }) => {
+  await page.goto('/');
+});
 
   test('should chain SQL injection to admin access', async ({ page }) => {
     // Step 1: SQL injection to get admin token
@@ -76,4 +76,3 @@ test.describe('Full Exploit Chain Tests', () => {
     
     console.log('✓ Full penetration testing workflow completed');
   });
-});

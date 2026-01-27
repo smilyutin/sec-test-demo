@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Home Page', () => {
-  test('loads successfully with no console errors', async ({ page }) => {
+test('loads successfully with no console errors', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', msg => {
       if (msg.type() === 'error') {
@@ -51,4 +50,4 @@ test.describe('Home Page', () => {
     expect(html).toContain('<title>Security Testing Demo</title>');
     expect(html).toContain('Demonstrating OWASP Top 10 Vulnerabilities');
   });
-});
+

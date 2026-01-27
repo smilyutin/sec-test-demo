@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Registration (baseline + optional mass-assignment demo)', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+});
 
   // -------------------------
   // BASELINE TESTS (always run)
@@ -92,4 +91,3 @@ test.describe('Registration (baseline + optional mass-assignment demo)', () => {
     await expect(result).toContainText('admin');
     await expect(result).toContainText('success');
   });
-});

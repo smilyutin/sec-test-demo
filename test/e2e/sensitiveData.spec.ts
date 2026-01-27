@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 
-test.describe('Sensitive Data Exposure (baseline + secure expectations + optional demo)', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+});
 
   // -------------------------
   // BASELINE TESTS (always run)
@@ -74,4 +73,3 @@ test.describe('Sensitive Data Exposure (baseline + secure expectations + optiona
     await expect(result).toBeVisible();
     await expect(result).toContainText('debug_mode');
   });
-});
