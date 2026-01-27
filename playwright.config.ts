@@ -9,20 +9,35 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: [
-    ['html'],
-    ['list']
-  ],
+  reporter: process.env.CI ? 'blob' : 'list',
+
   use: {
-    baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    trace: 'off',
+    screenshot: 'off',
+    video: 'off',
   },
 
   projects: [
     {
+      name: 'api',
+      testMatch: '**/api/**/*.spec.ts',
+      use: {
+        baseURL: 'http://localhost:3000',
+        trace: 'off',
+        screenshot: 'off',
+        video: 'off',
+      },
+    },
+    {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      testMatch: '**/e2e/**/*.spec.ts',
+      use: { 
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://localhost:3000',
+        trace: 'off',
+        screenshot: 'off',
+        video: 'off',
+      },
     },
   ],
 

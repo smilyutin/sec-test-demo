@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Search (baseline + optional XSS demo)', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+});
 
   // -------------------------
   // BASELINE TESTS (always run)
@@ -60,4 +59,3 @@ test.describe('Search (baseline + optional XSS demo)', () => {
     // Vulnerable behavior: payload is inserted into DOM as an element.
     await expect(page.locator('#searchResult img[data-test="xss-demo"]')).toHaveCount(1);
   });
-});

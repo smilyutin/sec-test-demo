@@ -1,9 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
 
-test.describe('/#/search (XSS)', () => {
-  test.beforeEach(async ({ page }: { page: Page }) => {
-    await page.goto('/');
-  });
+test.beforeEach(async ({ page }: { page: Page }) => {
+  await page.goto('/');
+});
 
   test('should reflect XSS payload in search results', async ({ page }) => {
     const xssPayload = '<script>window.xssTriggered=true</script>';
@@ -52,4 +51,3 @@ test.describe('/#/search (XSS)', () => {
       }
     }
   });
-});

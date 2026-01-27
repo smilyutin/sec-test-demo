@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('IDOR (User Data Form)', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+});
 
   test('shows user data when requesting an existing ID (current vulnerable behavior)', async ({ page }) => {
     await page.fill('#userId', '1');
@@ -49,4 +48,3 @@ test.describe('IDOR (User Data Form)', () => {
     // Currently fails because the app intentionally has this vulnerability for demo purposes.
     await expect(result).not.toContainText('secret_data');
   });
-});

@@ -1,6 +1,6 @@
 # Security Testing Demo - Portfolio Presentation
 
-## Elevator Pitch (30 seconds)
+## Opening
 
 "I built an intentionally vulnerable web application with a professional-grade automated security testing suite. It demonstrates how I identify OWASP Top 10 vulnerabilities, validate them through Playwright-based API and E2E tests, and design security tests that scale safely in CI using baseline, secure-expectation, and opt-in exploit modes."
 
