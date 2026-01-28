@@ -170,13 +170,45 @@ app.get('/api/config', (req, res) => {
 app.post('/api/register', (req, res) => {
   const { username, password, email } = req.body;
   
+  // Input validation
+  if (!username || username.trim().length === 0) {
+    return res.status(400).json({ error: 'Username is required' });
+  }
+  
+  if (!password) {
+    return res.status(400).json({ error: 'Password is required' });
+  }
+  
+  if (!email || email.trim().length === 0) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+  
+  // Password validation
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  }
+  
+  if (password.includes(' ')) {
+    return res.status(400).json({ error: 'Password cannot contain spaces' });
+  }
+  
+  // Email validation
+  if (email.length > 100) {
+    return res.status(400).json({ error: 'Email address is too long' });
+  }
+  
+  // Username validation
+  if (username.length > 50) {
+    return res.status(400).json({ error: 'Username is too long' });
+  }
+  
   // Vulnerable: doesn't validate input, allows role assignment
   const role = req.body.role || 'user'; // User can set their own role!
   
   try {
     const result = db.prepare(
       'INSERT INTO users (username, password, email, role, secret_data) VALUES (?, ?, ?, ?, ?)'
-    ).run(username, password, email, role, 'New user data');
+    ).run(username.trim(), password, email.trim(), role, 'New user data');
     
     res.json({ 
       success: true, 
@@ -187,6 +219,147 @@ app.post('/api/register', (req, res) => {
   } catch (err) {
     res.status(400).json({ error: 'User already exists or invalid data' });
   }
+});
+
+// ====================================
+// ML ANOMALY DETECTION MOCK ENDPOINTS
+// ====================================
+
+// Mock ML input validation endpoint
+app.post('/api/ml/validate-input', (req, res) => {
+  const { input } = req.body;
+  
+  const validation = {
+    isValid: true,
+    inputLength: input ? input.length : 0,
+    hasSpecialChars: input && (/[<>\"'&]/.test(input)),
+    encoding: 'utf-8',
+    sanitized: input ? input.replace(/[<>\"'&]/g, '') : ''
+  };
+  
+  // Simulate validation failures for edge cases
+  if (!input || input.length === 0) {
+    validation.isValid = false;
+  }
+  if (input && input.length > 5000) {
+    validation.isValid = false;
+  }
+  
+  res.json({
+    success: validation.isValid,
+    data: validation,
+    timestamp: Date.now()
+  });
+});
+
+// Mock feature extraction endpoint
+app.post('/api/ml/extract-features', (req, res) => {
+  const { request } = req.body;
+  
+  // Parse request string to extract features
+  const features = {
+    method: 'GET',
+    endpoint: '/unknown',
+    payloadSize: 0,
+    hasScript: false,
+    hasSqlKeywords: false,
+    hasSpecialChars: false,
+    timestamp: Date.now()
+  };
+  
+  if (request) {
+    const parts = request.split(' ');
+    if (parts.length >= 2) {
+      features.method = parts[0];
+      features.endpoint = parts[1];
+    }
+    
+    const requestLower = request.toLowerCase();
+    features.hasScript = requestLower.includes('<script>') || requestLower.includes('javascript:');
+    features.hasSqlKeywords = /\b(select|union|insert|delete|drop|or|and|where)\b/i.test(request);
+    features.hasSpecialChars = /[<>\"'&;]/.test(request);
+    features.payloadSize = request.length;
+  }
+  
+  res.json({
+    success: true,
+    features,
+    featureVector: [
+      features.payloadSize,
+      features.hasScript ? 1 : 0,
+      features.hasSqlKeywords ? 1 : 0,
+      features.hasSpecialChars ? 1 : 0
+    ]
+  });
+});
+
+// Mock ML prediction endpoint
+app.post('/api/ml/predict', (req, res) => {
+  const { input, threshold = 0.5 } = req.body;
+  
+  let anomalyScore = 0;
+  
+  if (input) {
+    const inputLower = input.toLowerCase();
+    
+    // Simulate ML scoring based on suspicious patterns
+    if (inputLower.includes('<script>') || inputLower.includes('javascript:')) anomalyScore += 0.8;
+    if (inputLower.includes("' or '") || inputLower.includes('union select')) anomalyScore += 0.9;
+    if (inputLower.includes('admin') && inputLower.includes('password')) anomalyScore += 0.3;
+    if (/\b(drop|delete|insert)\b/i.test(input)) anomalyScore += 0.7;
+    if (input.length > 1000) anomalyScore += 0.2;
+    if (/[<>\"'&;]/.test(input)) anomalyScore += 0.1;
+  }
+  
+  // Cap at 1.0 and add some randomness
+  anomalyScore = Math.min(1.0, anomalyScore + (Math.random() - 0.5) * 0.1);
+  
+  res.json({
+    success: true,
+    score: Math.round(anomalyScore * 1000) / 1000,
+    prediction: anomalyScore > threshold ? 'anomaly' : 'normal',
+    confidence: Math.round((anomalyScore > threshold ? anomalyScore : 1 - anomalyScore) * 1000) / 1000,
+    threshold,
+    timestamp: Date.now()
+  });
+});
+
+// Mock ML classification endpoint
+app.post('/api/ml/classify', (req, res) => {
+  const { input } = req.body;
+  
+  let prediction = 'normal';
+  let confidence = 0.5;
+  
+  if (input) {
+    const inputLower = input.toLowerCase();
+    
+    // Classification logic
+    if (inputLower.includes('<script>') || inputLower.includes('alert(')) {
+      prediction = 'attack';
+      confidence = 0.95;
+    } else if (inputLower.includes("' or '") || inputLower.includes('--')) {
+      prediction = 'attack';
+      confidence = 0.92;
+    } else if (inputLower.includes('admin') || inputLower.includes('root')) {
+      prediction = 'attack';
+      confidence = 0.7;
+    } else if (inputLower.includes('normal') || inputLower.includes('login') || inputLower.includes('search')) {
+      prediction = 'normal';
+      confidence = 0.85;
+    }
+  }
+  
+  res.json({
+    success: true,
+    prediction,
+    confidence: Math.round(confidence * 1000) / 1000,
+    categories: {
+      normal: prediction === 'normal' ? confidence : 1 - confidence,
+      attack: prediction === 'attack' ? confidence : 1 - confidence
+    },
+    timestamp: Date.now()
+  });
 });
 
 // Default route

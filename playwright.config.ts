@@ -9,7 +9,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: process.env.CI ? 'blob' : 'list',
+  reporter: process.env.CI ? 'blob' : [['html'], ['json', { outputFile: 'test-results.json' }], ['list']],
+
+  outputDir: './test-results',
 
   use: {
     trace: 'off',
@@ -37,6 +39,21 @@ export default defineConfig({
         trace: 'off',
         screenshot: 'off',
         video: 'off',
+      },
+    },
+    {
+      name: 'ml-anomaly',
+      testMatch: '**/ml-anomaly/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://localhost:3000',
+        trace: 'retain-on-failure',
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+      },
+      metadata: {
+        description: 'ML-based anomaly detection tests for security patterns',
+        tags: ['ml', 'anomaly-detection', 'security']
       },
     },
   ],

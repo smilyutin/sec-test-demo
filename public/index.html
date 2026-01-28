@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e173b 0%, #242826 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -25,7 +25,7 @@
         
         .header {
             text-align: center;
-            color: white;
+            color: #eed307;
             margin-bottom: 40px;
         }
         
@@ -35,8 +35,8 @@
         }
         
         .warning {
-            background: #ff6b6b;
-            color: white;
+            background: hsl(62, 100%, 71%);
+            color: rgb(27, 8, 5);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 30px;
@@ -52,14 +52,14 @@
         }
         
         .card {
-            background: white;
+            background: rgb(10, 151, 194);
             border-radius: 12px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
         .card h2 {
-            color: #667eea;
+            color: #0b0d01;
             margin-bottom: 15px;
             font-size: 1.5em;
         }
@@ -187,7 +187,7 @@
                 <h2>Cross-Site Scripting (XSS)</h2>
                 <span class="vulnerability-tag">OWASP A03</span>
                 <form id="searchForm">
-                    <input type="text" id="searchQuery" placeholder="Search products..." required>
+                    <input type="text" id="searchQuery" placeholder="Search products...">
                     <button type="submit">Search</button>
                 </form>
                 <div id="searchResult" class="result"></div>
@@ -203,7 +203,7 @@
                 <h2>Insecure Direct Object Reference</h2>
                 <span class="vulnerability-tag">OWASP A01</span>
                 <form id="idorForm">
-                    <input type="number" id="userId" placeholder="User ID (try 1, 2, 3)" value="1" required>
+                    <input type="text" id="userId" placeholder="User ID (try 1, 2, 3)" value="1">
                     <button type="submit">Get User Data</button>
                 </form>
                 <div id="idorResult" class="result"></div>
@@ -222,7 +222,7 @@
                 </form>
                 <div id="adminResult" class="result"></div>
                 <div class="exploit-examples">
-                    <h3>💡 Exploitation Hints:</h3>
+                    <h3>Exploitation Hints:</h3>
                     <code>Try crafting a JWT with "alg":"none"</code>
                     <code>Or modify the role in the payload</code>
                 </div>
@@ -244,9 +244,9 @@
                 <h2>Mass Assignment</h2>
                 <span class="vulnerability-tag">OWASP A04</span>
                 <form id="registerForm">
-                    <input type="text" id="regUsername" placeholder="Username" required>
-                    <input type="password" id="regPassword" placeholder="Password" required>
-                    <input type="email" id="regEmail" placeholder="Email" required>
+                    <input type="text" id="regUsername" placeholder="Username">
+                    <input type="password" id="regPassword" placeholder="Password">
+                    <input type="email" id="regEmail" placeholder="Email">
                     <input type="text" id="regRole" placeholder="Role (try 'admin')" value="user">
                     <button type="submit">Register</button>
                 </form>

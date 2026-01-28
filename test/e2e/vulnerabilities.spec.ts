@@ -1,32 +1,24 @@
-import { Page } from "playwright-core";
-import { test, expect } from '@playwright/test';
-//RUN_VULN_TESTS=1 npx playwright test test/e2e/vulnerabilities.spec.ts
+import { test, expect } from '../fixtures/e2e-fixtures';
 
-test.beforeEach(async ({ page }: { page: Page }) => {
-  await page.goto('/');
-});
+test.describe('Vulnerability Chain Testing', () => {
+  test.beforeEach(async ({ homePage }) => {
+    await homePage.goto();
+  });
 
-  test('should chain SQL injection to admin access', async ({ page }) => {
+  test('should chain SQL injection to admin access', async ({ loginPage, adminPage }) => {
     // Step 1: SQL injection to get admin token
-    await page.fill('#username', "admin' OR '1'='1'--");
-    await page.fill('#password', 'anything');
-    await page.click('#loginForm button[type="submit"]');
+    await loginPage.attemptSQLInjection("admin' OR '1'='1'--", 'anything');
     
-    await page.waitForSelector('#loginResult.show', { timeout: 5000 });
-    
-    // Step 2: Use token for admin access
-    await page.click('#adminForm button[type="submit"]');
-    await page.waitForSelector('#adminResult.show', { timeout: 5000 });
+    // Step 2: Use token for admin access  
+    await adminPage.attemptPrivilegedAccess();
+    await adminPage.verifyAdminAccess();
     
     console.log('✓ Full chain: SQL injection → Admin access');
   });
 
-  test('should exploit multiple vulnerabilities in sequence', async ({ page }) => {
+  test('should exploit multiple vulnerabilities in sequence', async ({ loginPage, adminPage, searchPage, homePage, page }) => {
     // 1. SQL Injection
-    await page.fill('#username', "admin'--");
-    await page.fill('#password', 'hramos');
-    await page.click('#loginForm button[type="submit"]');
-    await page.waitForSelector('#loginResult.show');
+    await loginPage.attemptSQLInjection("admin'--", 'hramos');
     console.log('  → SQL injection completed');
     
     // 2. IDOR
@@ -35,44 +27,69 @@ test.beforeEach(async ({ page }: { page: Page }) => {
     await page.waitForSelector('#idorResult.show');
     console.log('  → IDOR exploitation completed');
     
+    // 2. XSS Attack
+    await searchPage.performXSSAttack('<script>alert("XSS")</script>');
+    console.log('  → XSS attack completed');
+    
     // 3. Sensitive Data Exposure
-    await page.click('#configBtn');
-    await page.waitForSelector('#configResult.show');
+    await homePage.clickConfigButton();
+    await homePage.verifyConfigResultVisible();
     console.log('  → Config data exposed');
     
     console.log('✓ Multiple vulnerabilities exploited in sequence');
   });
 
-  test('should demonstrate full penetration testing workflow', async ({ page }) => {
+  test('should demonstrate full penetration testing workflow', async ({ 
+    homePage, 
+    loginPage, 
+    registrationPage,
+    page 
+  }) => {
     console.log('Starting penetration test workflow:');
     
     // Reconnaissance: Expose config
-    await page.click('#configBtn');
-    await page.waitForSelector('#configResult.show');
+    await homePage.clickConfigButton();
+    await homePage.verifyConfigResultVisible();
     console.log('  1. Reconnaissance - Config exposed');
     
     // Exploitation: SQL injection
-    await page.fill('#username', "admin' OR '1'='1'--");
-    await page.fill('#password', 'test');
-    await page.click('#loginForm button[type="submit"]');
-    await page.waitForSelector('#loginResult.show');
+    await loginPage.attemptSQLInjection("admin' OR '1'='1'--", 'test');
     console.log('  2. Exploitation - SQL injection successful');
     
     // Privilege escalation: Mass assignment
     const username = `attacker_${Date.now()}`;
-    await page.fill('#regUsername', username);
-    await page.fill('#regPassword', 'hacked');
-    await page.fill('#regEmail', `${username}@evil.com`);
-    await page.fill('#regRole', 'admin');
-    await page.click('#registerForm button[type="submit"]');
-    await page.waitForSelector('#registerResult.show');
+    const attackResult = await registrationPage.testMassAssignmentVulnerability();
     console.log('  3. Privilege escalation - Admin account created');
     
-    // Data exfiltration: IDOR
+    // Data exfiltration: IDOR (using page directly since not in fixtures)
     await page.fill('#userId', '1');
     await page.click('#idorForm button[type="submit"]');
     await page.waitForSelector('#idorResult.show');
-    console.log('  4. Data exfiltration - User data stolen');
+    console.log('  4. Data exfiltration - User data accessed');
     
     console.log('✓ Full penetration testing workflow completed');
   });
+
+  test('validates vulnerability mitigation measures', async ({ loginPage, registrationPage, homePage }) => {
+    test.skip(!process.env.SECURE_MODE, 'Run only in secure mode (set SECURE_MODE=1)');
+    
+    console.log('Testing vulnerability mitigations in secure mode:');
+    
+    // Test SQL injection protection
+    await loginPage.attemptSQLInjection("admin'--", 'test');
+    await loginPage.verifyLoginRejected();
+    console.log('  ✓ SQL injection blocked');
+    
+    // Test mass assignment protection  
+    const massAssignResult = await registrationPage.testMassAssignmentVulnerability();
+    expect(massAssignResult.isAdmin).toBe(false);
+    console.log('  ✓ Mass assignment blocked');
+    
+    // Test sensitive data protection
+    await homePage.clickConfigButton();
+    await homePage.verifyNoSensitiveDataExposed();
+    console.log('  ✓ Sensitive data protected');
+    
+    console.log('✓ All vulnerability mitigations working');
+  });
+});
