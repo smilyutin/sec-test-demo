@@ -1,48 +1,42 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/e2e-fixtures';
 
-//npx playwright test test/e2e/login.spec.ts
-//RUN_VULN_TESTS=1 npx playwright test test/e2e/login.spec.ts
-
-test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-});
+test.describe('Safe Login Testing', () => {
+  test.beforeEach(async ({ homePage }) => {
+    await homePage.goto();
+  });
 
   // -------------------------
   // BASELINE TESTS (always run)
   // -------------------------
 
-  test('logs in with valid credentials and stores token', async ({ page }) => {
+  test('logs in with valid credentials and stores token', async ({ loginPage, page }) => {
     const loginResp = page.waitForResponse(
       (r) => r.url().includes('/api/login') && r.request().method() === 'POST'
     );
 
-    await page.fill('#username', 'user1');
-    await page.fill('#password', 'password');
-    await page.click('#loginForm button[type="submit"]');
+    await loginPage.login('user1', 'password');
 
     const res = await loginResp;
     expect([200, 401, 500]).toContain(res.status());
 
-    const result = page.locator('#loginResult');
-    await expect(result).toBeVisible();
-    await expect(result).toContainText('token');
+    await loginPage.verifyLoginResult();
 
     const token = await page.evaluate(() => localStorage.getItem('token'));
     expect(token, 'Expected token stored in localStorage after login').toBeTruthy();
   });
 
-  test('rejects invalid credentials', async ({ page }) => {
+  test('rejects invalid credentials', async ({ loginPage, page }) => {
     const loginResp = page.waitForResponse(
       (r) => r.url().includes('/api/login') && r.request().method() === 'POST'
     );
 
-    await page.fill('#username', 'user1');
-    await page.fill('#password', 'wrong-password');
-    await page.click('#loginForm button[type="submit"]');
+    await loginPage.login('user1', 'wrong-password');
 
     const res = await loginResp;
     expect([401, 500]).toContain(res.status());
 
+    await loginPage.verifyLoginError();
+    
     const result = page.locator('#loginResult');
     await expect(result).toBeVisible();
     await expect(result).toContainText('error');
@@ -77,3 +71,4 @@ test.beforeEach(async ({ page }) => {
     const token = await page.evaluate(() => localStorage.getItem('token'));
     expect(token).toBeTruthy();
   });
+});

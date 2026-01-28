@@ -8,7 +8,11 @@
     "dev": "nodemon server.js",
     "test": "npm run test:api && npm run test:e2e",
     "test:api": "playwright test test/api --project=api",
-    "test:e2e": "playwright test test/e2e --project=chromium"
+    "test:e2e": "playwright test test/e2e --project=chromium",
+    "test:ml-anomaly": "playwright test test/ml-anomaly --project=ml-anomaly",
+    "test:all": "npm run test && npm run test:ml-anomaly",
+    "test:results": "node generate-test-results.js",
+    "test:report": "npx playwright show-report"
   },
   "keywords": [
     "security",

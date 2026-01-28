@@ -22,38 +22,133 @@ This project showcases practical knowledge of:
 ### Prerequisites
 - Node.js (v14 or higher)
 - npm or yarn
+- Git
 
-### Installation
+### Installation & Setup
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd juice-shop
+
 # Install dependencies
 npm install
 
-# Start the application
+# Install Playwright browsers (required for testing)
+npx playwright install
+
+# Start the vulnerable application
 npm start
 
-# For development with auto-reload
-npm run dev
+# In a separate terminal, run baseline security tests
+npm run test:e2e
 ```
 
 The application will be available at `http://localhost:3000`
 
+### Quick Test Overview
+
+```bash
+# Safe tests (always run these)
+npm run test:e2e          # Browser-based security testing
+npm run test:api          # API endpoint security validation
+npm run test:ml-anomaly   # ML-based anomaly detection
+
+# Interactive debugging
+npm run test:ui           # Visual test execution and debugging
+
+# Advanced security testing (controlled environments only)
+npm run test:vuln         # Vulnerability demonstrations (opt-in)
+npm run test:secure       # Security expectation validation
+```
+
+## Project Structure
+
+### Core Application
+```
+.
+├── package.json                 # Dependencies and scripts
+├── playwright.config.ts          # Playwright test configuration
+├── server.js                    # Vulnerable Express.js application
+├── public/                      # Static web assets
+│   └── index.html              # Main application UI
+└── README.md                   # This documentation
+```
+
+### Test Architecture
+```
+test/
+├── global-setup.ts              # Test environment initialization
+├── global-teardown.ts           # Test environment cleanup
+├── fixtures/                    # Shared test utilities
+│   ├── e2e-fixtures.ts         # Browser-based test fixtures
+│   └── ml-anomaly-fixtures.ts  # ML anomaly detection fixtures
+├── pages/                       # Page Object Model classes
+│   ├── HomePage.ts             # Homepage interactions
+│   ├── LoginPage.ts            # Authentication flows
+│   ├── RegistrationPage.ts     # User registration
+│   ├── SearchPage.ts           # Search functionality
+│   ├── AdminPage.ts            # Admin panel operations
+│   └── IDORPage.ts             # IDOR vulnerability testing
+├── utils/                       # Testing utilities
+│   ├── AttackPatternDetector.ts # ML attack pattern detection
+│   ├── BehaviorAnalyzer.ts     # User behavior analysis
+│   ├── MLModelValidator.ts     # ML model validation
+│   └── TrafficAnalyzer.ts      # Network traffic analysis
+├── api/                         # API-level security tests
+│   ├── api.spec.ts            # General API functionality
+│   ├── authentication.spec.ts # JWT and auth bypass tests
+│   ├── idor.spec.ts           # Insecure Direct Object Reference
+│   └── vulnerabilities.spec.ts # Combined API vulnerability tests
+├── e2e/                         # Browser-based security tests
+│   ├── authentication.spec.ts # Browser auth flows and bypasses
+│   ├── home.spec.ts           # Homepage and navigation
+│   ├── idor.spec.ts           # IDOR via browser interface
+│   ├── login.safe.spec.ts     # Safe login functionality
+│   ├── registration.spec.ts   # User registration and validation
+│   ├── search.spec.ts         # Search with XSS demonstrations
+│   ├── sensitiveData.spec.ts  # Data exposure testing
+│   ├── vulnerabilities.spec.ts # Chained exploit demonstrations
+│   └── xss.spec.ts            # Cross-site scripting tests
+├── ml-anomaly/                  # Machine Learning anomaly detection
+│   ├── attack-patterns.spec.ts # ML-based attack detection
+│   ├── baseline-behavior.spec.ts # Normal user behavior patterns
+│   ├── behavioral-anomalies.spec.ts # Behavioral anomaly detection
+│   ├── ml-validation.spec.ts   # ML model performance validation
+│   ├── traffic-patterns.spec.ts # Network traffic analysis
+│   └── README.md              # ML testing documentation
+└── seed.spec.ts                 # Test data initialization
+```
+
 ## Automated Testing with Playwright
 
-This project includes comprehensive Playwright test suites organized like OWASP Juice Shop.
+This project includes comprehensive Playwright test suites with advanced ML-based anomaly detection, organized similar to OWASP Juice Shop but with modern tooling.
 
-### Test Structure
+### Test Architecture Principles
 
-- **test/api/** - API endpoint tests for direct vulnerability validation
-- **test/e2e/** - End-to-end browser tests for UI-based exploits
+1. **Three-Tier Testing Model**:
+   - **Baseline Tests** (always safe for CI): Functional testing and smoke tests
+   - **Security Expectation Tests** (post-hardening validation): Tests that should pass after security fixes
+   - **Vulnerability Demonstration Tests** (opt-in only): Explicit exploit demonstrations
+
+2. **Separation of Concerns**:
+   - **API Tests** (`test/api/`): Direct HTTP endpoint testing for rapid feedback
+   - **E2E Tests** (`test/e2e/`): Full browser-based testing for realistic attack scenarios
+   - **ML Anomaly Tests** (`test/ml-anomaly/`): Machine learning-based attack pattern detection
+
+3. **Page Object Model**: Maintainable test code with reusable page interaction classes
+
+4. **Fixture-Based Architecture**: Shared test utilities for consistent setup and teardown
 
 ### Running Tests
 
 ```bash
-# Install Playwright browsers (first time only)
+# First-time setup
+npm install
 npx playwright install
 
-# Run all tests (API + E2E)
+# === SAFE TESTS (CI-friendly) ===
+# Run all baseline tests
 npm test
 
 # Run only API tests
@@ -62,14 +157,43 @@ npm run test:api
 # Run only E2E tests  
 npm run test:e2e
 
-# Run tests with UI mode (interactive)
+# Run ML anomaly detection tests
+npm run test:ml-anomaly
+
+# === DEVELOPMENT & DEBUGGING ===
+# Interactive UI mode (recommended for development)
 npm run test:ui
 
-# Run tests in headed mode (see browser)
+# Run with visible browser (debugging)
 npm run test:headed
 
-# View test report
+# Run with detailed tracing
+npm run test:debug
+
+# View HTML test report
 npm run test:report
+
+# === SECURITY TESTING (opt-in) ===
+# Run vulnerability demonstrations (NEVER in CI)
+npm run test:vuln
+# Equivalent to: RUN_VULN_TESTS=1 npx playwright test
+
+# Run security expectation tests (post-hardening)
+npm run test:secure
+# Equivalent to: SECURE_MODE=1 npx playwright test
+
+# === SPECIFIC TEST SUITES ===
+# Run only login-related tests
+npx playwright test login
+
+# Run only XSS tests
+npx playwright test xss
+
+# Run only IDOR tests
+npx playwright test idor
+
+# Run tests matching pattern
+npx playwright test --grep "SQL injection"
 ```
 
 ### Test Coverage

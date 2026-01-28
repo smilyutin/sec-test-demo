@@ -1,27 +1,25 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/e2e-fixtures';
 
-
-test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-});
+test.describe('Sensitive Data Exposure Testing', () => {
+  test.beforeEach(async ({ homePage }) => {
+    await homePage.goto();
+  });
 
   // -------------------------
   // BASELINE TESTS (always run)
   // -------------------------
 
-  test('config button calls /api/config and renders response panel', async ({ page }) => {
+  test('config button calls /api/config and renders response panel', async ({ homePage, page }) => {
     const cfgResp = page.waitForResponse(
       (r) => r.url().includes('/api/config') && r.request().method() === 'GET'
     );
 
-    await page.click('#configBtn');
+    await homePage.clickConfigButton();
 
     const res = await cfgResp;
     expect([200, 500]).toContain(res.status());
 
-    const result = page.locator('#configResult');
-    await expect(result).toBeVisible();
-    await expect(result).toContainText('{');
+    await homePage.verifyConfigResultVisible();
   });
 
   // --------------------------------------
@@ -29,19 +27,14 @@ test.beforeEach(async ({ page }) => {
   // SECURE_MODE=1 npx playwright test
   // --------------------------------------
 
-  test('SECURITY EXPECTATION: config endpoint should not expose secrets (run in SECURE_MODE)', async ({ page }) => {
+  test('SECURITY EXPECTATION: config endpoint should not expose secrets (run in SECURE_MODE)', async ({ homePage }) => {
     test.skip(process.env.SECURE_MODE !== '1', 'Run security expectations only after hardening (set SECURE_MODE=1)');
 
-    await page.click('#configBtn');
-
-    const result = page.locator('#configResult');
-    await expect(result).toBeVisible();
+    await homePage.clickConfigButton();
+    await homePage.verifyConfigResultVisible();
 
     // After hardening, the UI/API should not leak secret keys or API keys.
-    await expect(result).not.toContainText('secret_key');
-    await expect(result).not.toContainText('api_keys');
-    await expect(result).not.toContainText('stripe');
-    await expect(result).not.toContainText('aws');
+    await homePage.verifyNoSensitiveDataExposed();
   });
 
   // --------------------------------------
@@ -49,27 +42,41 @@ test.beforeEach(async ({ page }) => {
   // RUN_VULN_TESTS=1 npx playwright test
   // --------------------------------------
 
-  test('VULN DEMO: config endpoint exposes secret key and API keys (opt-in)', async ({ page }) => {
+  test('VULN DEMO: config endpoint exposes secret key and API keys (opt-in)', async ({ homePage }) => {
     test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
 
-    await page.click('#configBtn');
+    await homePage.clickConfigButton();
+    await homePage.verifyConfigResultVisible();
 
-    const result = page.locator('#configResult');
-    await expect(result).toBeVisible();
-
-    // Current intentionally vulnerable behavior
-    await expect(result).toContainText('secret_key');
-    await expect(result).toContainText('api_keys');
-    await expect(result).toContainText('stripe');
-    await expect(result).toContainText('aws');
+    // Current intentionally vulnerable behavior - demonstrate secret exposure
+    const exposedSecrets = await homePage.checkForExposedSecrets();
+    
+    console.log(`WARNING: Vulnerability Demo: Found ${exposedSecrets.length} exposed secrets`);
+    
+    // Verify specific secrets are exposed in vulnerable mode
+    expect(exposedSecrets).toContain('secret_key');
+    expect(exposedSecrets).toContain('api_keys');
   });
 
-  test('VULN DEMO: debug mode is visible (opt-in)', async ({ page }) => {
+  test('VULN DEMO: debug mode is visible (opt-in)', async ({ homePage }) => {
     test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
 
-    await page.click('#configBtn');
-
-    const result = page.locator('#configResult');
-    await expect(result).toBeVisible();
-    await expect(result).toContainText('debug_mode');
+    await homePage.clickConfigButton();
+    await homePage.verifyConfigResultVisible();
+    
+    const exposedSecrets = await homePage.checkForExposedSecrets();
+    expect(exposedSecrets).toContain('debug_mode');
   });
+
+  test('validates config response format and structure', async ({ homePage, page }) => {
+    const cfgResp = page.waitForResponse(r => r.url().includes('/api/config'));
+    
+    await homePage.clickConfigButton();
+    const res = await cfgResp;
+    
+    expect(res.status()).toBe(200);
+    const configData = await res.json();
+    expect(configData).toBeDefined();
+    expect(typeof configData).toBe('object');
+  });
+});

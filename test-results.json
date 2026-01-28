@@ -1,0 +1,168 @@
+{
+  "config": {
+    "configFile": "/Users/minime/Projects/juice-shop/playwright.config.ts",
+    "rootDir": "/Users/minime/Projects/juice-shop/test",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "/Users/minime/Projects/juice-shop/test/global-setup.ts",
+    "globalTeardown": "/Users/minime/Projects/juice-shop/test/global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/minime/Projects/juice-shop/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "api",
+        "name": "api",
+        "testDir": "/Users/minime/Projects/juice-shop/test",
+        "testIgnore": [],
+        "testMatch": [
+          "**/api/**/*.spec.ts"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/minime/Projects/juice-shop/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/minime/Projects/juice-shop/test",
+        "testIgnore": [],
+        "testMatch": [
+          "**/e2e/**/*.spec.ts"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/minime/Projects/juice-shop/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "description": "ML-based anomaly detection tests for security patterns",
+          "tags": [
+            "ml",
+            "anomaly-detection",
+            "security"
+          ]
+        },
+        "id": "ml-anomaly",
+        "name": "ml-anomaly",
+        "testDir": "/Users/minime/Projects/juice-shop/test",
+        "testIgnore": [],
+        "testMatch": [
+          "**/ml-anomaly/**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "3way",
+    "version": "1.57.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm start",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "e2e/registration.spec.ts",
+      "file": "e2e/registration.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "User Registration",
+          "file": "e2e/registration.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "does not allow registration with script tags in username (XSS)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 266,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-28T23:09:16.213Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-b05e4dd2cc83bc117db1",
+              "file": "e2e/registration.spec.ts",
+              "line": 234,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-01-28T23:09:15.722Z",
+    "duration": 871.877999999997,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

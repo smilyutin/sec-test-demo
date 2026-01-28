@@ -1,61 +1,72 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/e2e-fixtures';
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-});
-
-  // -------------------------
-  // BASELINE TESTS (always run)
-  // -------------------------
-
-  test('search calls /api/search and renders results panel', async ({ page }) => {
-    const searchResp = page.waitForResponse(
-      (r) => r.url().includes('/api/search') && r.request().method() === 'GET'
-    );
-
-    await page.fill('#searchQuery', 'Laptop');
-    await page.click('#searchForm button[type="submit"]');
-
-    const res = await searchResp;
-    expect([200, 500]).toContain(res.status());
-
-    const result = page.locator('#searchResult');
-    await expect(result).toBeVisible();
-    await expect(result).toContainText('Search for:');
+test.describe('Search Functionality', () => {
+  test.beforeEach(async ({ homePage }) => {
+    await homePage.goto();
   });
 
-  test('SECURITY EXPECTATION: should not interpret user input as HTML (run in SECURE_MODE)', async ({ page }) => {
+  test('search calls /api/search and renders results panel', async ({ searchPage }) => {
+    await searchPage.searchAndValidateResponse('Laptop');
+  });
+
+  test('SECURITY EXPECTATION: should not interpret user input as HTML (run in SECURE_MODE)', async ({ searchPage }) => {
     test.skip(!process.env.SECURE_MODE, 'Run security expectations only after hardening (set SECURE_MODE=1)');
 
-    // Safe sentinel: if the UI injects it as HTML, we would see a real <img> element.
     const sentinel = `<img src=x data-test="xss-sentinel">`;
-
-    await page.fill('#searchQuery', sentinel);
-    await page.click('#searchForm button[type="submit"]');
-
-    const result = page.locator('#searchResult');
-    await expect(result).toBeVisible();
-
-    // Secure behavior: user input should be encoded/escaped, so no element should be created in the DOM.
-    await expect(page.locator('#searchResult img[data-test="xss-sentinel"]')).toHaveCount(0);
+    await searchPage.validateSecureSearch(sentinel);
+    await searchPage.validateXSSPrevention(sentinel);
   });
 
-  // --------------------------------------
-  // VULNERABILITY DEMO (opt-in only)
-  // RUN_VULN_TESTS=1 npx playwright test
-  // --------------------------------------
-
-  test('VULN DEMO: user input is rendered as HTML (opt-in)', async ({ page }) => {
+  test('VULN DEMO: user input is rendered as HTML (opt-in)', async ({ searchPage }) => {
     test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
 
-    const payload = `<img src=x data-test="xss-demo">`;
-
-    await page.fill('#searchQuery', payload);
-    await page.click('#searchForm button[type="submit"]');
-
-    const result = page.locator('#searchResult');
-    await expect(result).toBeVisible();
-
-    // Vulnerable behavior: payload is inserted into DOM as an element.
-    await expect(page.locator('#searchResult img[data-test="xss-demo"]')).toHaveCount(1);
+    const payload = '<strong>Bold Text</strong>';
+    await searchPage.performXSSSearch(payload);
+    await searchPage.validateXSSReflection(payload);
   });
+
+  test('handles empty search query', async ({ searchPage }) => {
+    const response = await searchPage.search('');
+    expect([200, 400, 500]).toContain(response.status());
+  });
+
+  test('handles special characters in search', async ({ searchPage }) => {
+    const specialChars = ['!', '@', '#', '$', '%', '^', '&', '*'];
+    
+    for (const char of specialChars) {
+      const response = await searchPage.search(char);
+      expect([200, 400, 500]).toContain(response.status());
+    }
+  });
+
+  test('search results contain query reference', async ({ searchPage }) => {
+    const query = 'laptop computer';
+    await searchPage.search(query);
+    
+    const resultText = await searchPage.getSearchResultText();
+    expect(resultText).toContain('Search for:');
+  });
+
+});
+
+test('VULN DEMO: direct DOM XSS injection (manual)', async ({ page }) => {
+  test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+  
+  // Ensure page is loaded and elements are available
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  
+  // Wait for the search form to be available
+  await page.waitForSelector('#searchQuery', { timeout: 10000 });
+  
+  const payload = `<img src=x data-test="xss-demo">`;
+
+  await page.fill('#searchQuery', payload);
+  await page.click('#searchForm button[type="submit"]');
+
+  const result = page.locator('#searchResult');
+  await expect(result).toBeVisible({ timeout: 10000 });
+
+  // Vulnerable behavior: payload is inserted into DOM as an element.
+  await expect(page.locator('#searchResult img[data-test="xss-demo"]')).toHaveCount(1);
+});
