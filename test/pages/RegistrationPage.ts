@@ -83,16 +83,6 @@ export class RegistrationPage {
     // Check for user already exists or similar error message
   }
 
-  async testMassAssignmentVulnerability() {
-    const username = `admin_${Date.now()}`;
-    const result = await this.registerWithRole(username, 'admin');
-    
-    return {
-      isAdmin: result.data?.role === 'admin',
-      role: result.data?.role || 'user'
-    };
-  }
-
   async attemptMassAssignment(username: string, password: string, email: string, maliciousRole: string = 'admin') {
     const userData = { username, password, email, role: maliciousRole };
     return await this.registerUser(userData);
