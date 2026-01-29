@@ -170,7 +170,7 @@ app.get('/api/config', (req, res) => {
 app.post('/api/register', (req, res) => {
   const { username, password, email } = req.body;
   
-  // Input validation
+  // Input validation - check for presence first
   if (!username || username.trim().length === 0) {
     return res.status(400).json({ error: 'Username is required' });
   }
@@ -183,6 +183,10 @@ app.post('/api/register', (req, res) => {
     return res.status(400).json({ error: 'Email is required' });
   }
   
+  // Trim inputs for validation and storage
+  const trimmedUsername = username.trim();
+  const trimmedEmail = email.trim();
+  
   // Password validation
   if (password.length < 6) {
     return res.status(400).json({ error: 'Password must be at least 6 characters long' });
@@ -193,24 +197,24 @@ app.post('/api/register', (req, res) => {
   }
   
   // Email validation
-  if (email.length > 100) {
+  if (trimmedEmail.length > 100) {
     return res.status(400).json({ error: 'Email address is too long' });
   }
   
-  // Username validation
-  if (username.length > 50) {
+  // Username validation (on trimmed username)
+  if (trimmedUsername.length > 50) {
     return res.status(400).json({ error: 'Username is too long' });
   }
   
   // Username format validation - only allow alphanumeric characters and underscores
   const usernameRegex = /^[a-zA-Z0-9_]+$/;
-  if (!usernameRegex.test(username)) {
+  if (!usernameRegex.test(trimmedUsername)) {
     return res.status(400).json({ error: 'Username can only contain letters, numbers, and underscores' });
   }
   
   // Prevent XSS - check for script tags and HTML in username
   const xssPattern = /<script|<\/script|javascript:|on\w+\s*=|<iframe|<object|<embed/i;
-  if (xssPattern.test(username)) {
+  if (xssPattern.test(trimmedUsername)) {
     return res.status(400).json({ error: 'Username contains invalid characters' });
   }
   
@@ -220,7 +224,7 @@ app.post('/api/register', (req, res) => {
   try {
     const result = db.prepare(
       'INSERT INTO users (username, password, email, role, secret_data) VALUES (?, ?, ?, ?, ?)'
-    ).run(username.trim(), password, email.trim(), role, 'New user data');
+    ).run(trimmedUsername, password, trimmedEmail, role, 'New user data');
     
     res.json({ 
       success: true, 

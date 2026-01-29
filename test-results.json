@@ -118,6 +118,610 @@
           "column": 6,
           "specs": [
             {
+              "title": "registers a new user successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 211,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:46.001Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-28d1e7c91c3c5ef3258b",
+              "file": "e2e/registration.spec.ts",
+              "line": 12,
+              "column": 7
+            },
+            {
+              "title": "SECURITY EXPECTATION: ignores client-supplied role (should fail until fixed)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                        "line": 25,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:46.405Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                            "line": 25,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-13dee93e5cf4721ddf13",
+              "file": "e2e/registration.spec.ts",
+              "line": 25,
+              "column": 8
+            },
+            {
+              "title": "VULN DEMO: accepts arbitrary role from client (opt-in)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)",
+                      "location": {
+                        "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                        "line": 41,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 58,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:46.406Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)",
+                          "location": {
+                            "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                            "line": 41,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-2be57bd2b401331b67a0",
+              "file": "e2e/registration.spec.ts",
+              "line": 40,
+              "column": 7
+            },
+            {
+              "title": "handles registration form validation errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                        "line": 58,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:46.471Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                            "line": 58,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-1a80b9fa7506720cf3b2",
+              "file": "e2e/registration.spec.ts",
+              "line": 58,
+              "column": 8
+            },
+            {
+              "title": "prevents duplicate user registration",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 284,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:46.471Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-40ad1b58b6f359f6e3f8",
+              "file": "e2e/registration.spec.ts",
+              "line": 75,
+              "column": 7
+            },
+            {
+              "title": "does not allow registration with weak password",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                        "line": 97,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:46.761Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                            "line": 97,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-b53e6439ac3894a0567c",
+              "file": "e2e/registration.spec.ts",
+              "line": 97,
+              "column": 8
+            },
+            {
+              "title": "does not allow registration with missing username",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 235,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:46.761Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-582e424b1f6308989e24",
+              "file": "e2e/registration.spec.ts",
+              "line": 110,
+              "column": 7
+            },
+            {
+              "title": "does not allow registration with missing email",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                        "line": 120,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:47.006Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                            "line": 120,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-916b71b550c31a238c88",
+              "file": "e2e/registration.spec.ts",
+              "line": 120,
+              "column": 8
+            },
+            {
+              "title": "does not allow registration with missing password",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                        "line": 131,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:47.006Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                            "line": 131,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-c9f5fa3f93ea44bf5624",
+              "file": "e2e/registration.spec.ts",
+              "line": 131,
+              "column": 8
+            },
+            {
+              "title": "validates username format requirements",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 217,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:47.006Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-b93da12f998e2f01a022",
+              "file": "e2e/registration.spec.ts",
+              "line": 142,
+              "column": 7
+            },
+            {
+              "title": "shows error for already registered email with different username",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 294,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:47.234Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-65fd0d045de9a0fa0167",
+              "file": "e2e/registration.spec.ts",
+              "line": 154,
+              "column": 7
+            },
+            {
+              "title": "does not allow registration with extremely long username",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 231,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:47.533Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-ca73eacc84c55365aa11",
+              "file": "e2e/registration.spec.ts",
+              "line": 177,
+              "column": 7
+            },
+            {
+              "title": "does not allow registration with extremely long email",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                        "line": 188,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:47.769Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "/Users/minime/Projects/juice-shop/test/e2e/registration.spec.ts",
+                            "line": 188,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-49e6ceaf5ebfb2156b47",
+              "file": "e2e/registration.spec.ts",
+              "line": 188,
+              "column": 8
+            },
+            {
+              "title": "does not allow registration with special characters in username",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 225,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:47.769Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-8cc6842751b4a1890433",
+              "file": "e2e/registration.spec.ts",
+              "line": 200,
+              "column": 7
+            },
+            {
               "title": "does not allow registration with spaces in password",
               "ok": true,
               "tags": [],
@@ -130,15 +734,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 0,
+                      "workerIndex": 6,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 324,
+                      "duration": 232,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-01-29T00:07:14.740Z",
+                      "startTime": "2026-01-29T00:17:47.999Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -148,7 +752,75 @@
               ],
               "id": "00522865b2429d41f9e0-77c6d9116dfc85048585",
               "file": "e2e/registration.spec.ts",
-              "line": 208,
+              "line": 210,
+              "column": 7
+            },
+            {
+              "title": "does not allow registration with uppercase email if system is case-insensitive",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 233,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:48.240Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-ba098ed4d822a586c548",
+              "file": "e2e/registration.spec.ts",
+              "line": 222,
+              "column": 7
+            },
+            {
+              "title": "does not allow registration with script tags in username (XSS)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 234,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-29T00:17:48.479Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "00522865b2429d41f9e0-b05e4dd2cc83bc117db1",
+              "file": "e2e/registration.spec.ts",
+              "line": 236,
               "column": 7
             }
           ]
@@ -158,10 +830,10 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-01-29T00:07:14.220Z",
-    "duration": 960.2600000000093,
-    "expected": 1,
-    "skipped": 0,
+    "startTime": "2026-01-29T00:17:45.397Z",
+    "duration": 3344.5999999998603,
+    "expected": 10,
+    "skipped": 7,
     "unexpected": 0,
     "flaky": 0
   }
