@@ -205,7 +205,7 @@ test.describe('User Registration', () => {
     await registrationPage.verifyValidationError('username');
   });
 
-  test.fixme('does not allow registration with spaces in password', async ({ registrationPage }) => {
+  test('does not allow registration with spaces in password', async ({ registrationPage }) => {
     // FIXME: Server validation not properly implemented - allows spaces in passwords
     const username = `spacepass_${Date.now()}`;
     await registrationPage.fillRegistrationForm({

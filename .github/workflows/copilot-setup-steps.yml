@@ -32,8 +32,8 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
-    - name: Run tests (API + E2E)
-      run: npm test
+    - name: Run tests (API + E2E + ML Anomaly)
+      run: npm run test:all
       env:
         # IMPORTANT: Never set RUN_VULN_TESTS=1 in CI
         # Exploit demonstrations are opt-in only for local development

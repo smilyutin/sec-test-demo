@@ -118,7 +118,7 @@
           "column": 6,
           "specs": [
             {
-              "title": "does not allow registration with script tags in username (XSS)",
+              "title": "does not allow registration with spaces in password",
               "ok": true,
               "tags": [],
               "tests": [
@@ -130,15 +130,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 9,
+                      "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 266,
+                      "duration": 324,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-01-28T23:09:16.213Z",
+                      "startTime": "2026-01-29T00:07:14.740Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -146,9 +146,9 @@
                   "status": "expected"
                 }
               ],
-              "id": "00522865b2429d41f9e0-b05e4dd2cc83bc117db1",
+              "id": "00522865b2429d41f9e0-77c6d9116dfc85048585",
               "file": "e2e/registration.spec.ts",
-              "line": 234,
+              "line": 208,
               "column": 7
             }
           ]
@@ -158,8 +158,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-01-28T23:09:15.722Z",
-    "duration": 871.877999999997,
+    "startTime": "2026-01-29T00:07:14.220Z",
+    "duration": 960.2600000000093,
     "expected": 1,
     "skipped": 0,
     "unexpected": 0,

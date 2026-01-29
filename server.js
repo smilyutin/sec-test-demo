@@ -202,6 +202,18 @@ app.post('/api/register', (req, res) => {
     return res.status(400).json({ error: 'Username is too long' });
   }
   
+  // Username format validation - only allow alphanumeric characters and underscores
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+  if (!usernameRegex.test(username)) {
+    return res.status(400).json({ error: 'Username can only contain letters, numbers, and underscores' });
+  }
+  
+  // Prevent XSS - check for script tags and HTML in username
+  const xssPattern = /<script|<\/script|javascript:|on\w+\s*=|<iframe|<object|<embed/i;
+  if (xssPattern.test(username)) {
+    return res.status(400).json({ error: 'Username contains invalid characters' });
+  }
+  
   // Vulnerable: doesn't validate input, allows role assignment
   const role = req.body.role || 'user'; // User can set their own role!
   
