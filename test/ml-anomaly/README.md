@@ -60,7 +60,7 @@ These tests are designed to:
 - Error clustering detection
 - Response time outlier identification
 
-### 🤖 **ML Model Validation** (`ml-validation.spec.ts`)
+### **ML Model Validation** (`ml-validation.spec.ts`)
 - Feature extraction accuracy
 - Anomaly score calibration
 - Real-time detection performance
