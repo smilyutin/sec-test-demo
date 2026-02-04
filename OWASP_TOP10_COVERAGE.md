@@ -33,12 +33,9 @@ This document maps the existing test files to OWASP Top 10 2021 vulnerabilities 
 
 ## Integration with ZAP Baseline Scan
 
-The [zap-baseline.spec.ts](security/zap-baseline.spec.ts) file provides:
+This repository currently focuses on Playwright-based OWASP Top 10 specs under `test/e2e/` (the `zap_*.spec.ts` files).
 
-- **Automated ZAP Baseline Scan**: Runs OWASP ZAP Docker container against staging URL
-- **Security Headers Validation**: Complementary checks for proper header configuration
-- **Misconfiguration Detection**: Additional checks for common security issues
-- **CI/CD Integration**: Configurable thresholds and reporting
+There is no separate “security tests” directory or a bundled ZAP baseline runner spec at the moment.
 
 ## Not Yet Covered (Opportunities for Extension)
 
@@ -66,17 +63,17 @@ The [zap-baseline.spec.ts](security/zap-baseline.spec.ts) file provides:
 
 ### Run All ZAP-Related Tests
 ```bash
-# Run ZAP baseline scan
-npm run test:security
+# Run OWASP Top 10 (ZAP-style) specs
+npx playwright test test/e2e/zap_*.spec.ts --project=chromium
 
 # Run specific OWASP Top 10 tests
 npx playwright test test/e2e/zap_*.spec.ts
 
 # Run vulnerability demonstrations (opt-in)
-RUN_VULN_TESTS=1 npx playwright test test/e2e/zap_*.spec.ts
+RUN_VULN_TESTS=1 npx playwright test test/e2e/zap_*.spec.ts --project=chromium
 
 # Run security expectations (after hardening)
-SECURE_MODE=1 npx playwright test test/e2e/zap_*.spec.ts
+SECURE_MODE=1 npx playwright test test/e2e/zap_*.spec.ts --project=chromium
 ```
 
 ### Environment Variables
