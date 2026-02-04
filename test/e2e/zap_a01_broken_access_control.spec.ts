@@ -1,11 +1,8 @@
-import { test, expect } from '../fixtures/e2e-fixtures';
+// OWASP Top 10 A01:2021 – Broken Access Control (IDOR)
+import { test, expect } from '../fixtures/zap-fixtures';
 import { IDORPage } from '../pages/IDORPage';
 
 test.describe('IDOR Vulnerability Testing', () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.goto();
-  });
-
   test('shows user data when requesting an existing ID (current vulnerable behavior)', async ({ page }) => {
     const idorPage = new IDORPage(page);
     await idorPage.validateUserDataAccess('1');
@@ -24,15 +21,19 @@ test.describe('IDOR Vulnerability Testing', () => {
     expect(hasSecretData).toBe(false);
   });
 
-  test('SECURITY EXPECTATION: validates secure access (run in SECURE_MODE)', async ({ page }) => {
-    test.skip(!process.env.SECURE_MODE, 'Run security expectations only after hardening (set SECURE_MODE=1)');
+  test.fixme('SECURITY EXPECTATION: validates secure access (run in SECURE_MODE)', async ({ page }) => {
+    // EXPECTED FAILURE: This application is intentionally vulnerable for educational purposes.
+    // This test demonstrates secure access control that should be implemented after hardening.
+    console.log('SECURITY EXPECTATION: Validating secure access controls');
     
     const idorPage = new IDORPage(page);
     await idorPage.validateSecureAccess('1');
   });
 
-  test('should prevent unauthorized user enumeration', async ({ page }) => {
-    test.skip(!process.env.SECURE_MODE, 'Run security expectations only after hardening (set SECURE_MODE=1)');
+  test.fixme('should prevent unauthorized user enumeration', async ({ page }) => {
+    // EXPECTED FAILURE: This application is intentionally vulnerable for educational purposes.
+    // This test demonstrates secure user enumeration prevention after hardening.
+    console.log(' SECURITY EXPECTATION: Validating prevention of unauthorized user enumeration');
     
     const idorPage = new IDORPage(page);
     const results = await idorPage.enumerateUsers(1, 5);
@@ -40,22 +41,6 @@ test.describe('IDOR Vulnerability Testing', () => {
     // In secure mode, user enumeration should be limited
     const successfulAccesses = results.filter(r => r.found);
     expect(successfulAccesses.length).toBeLessThanOrEqual(1); // Should only allow own user data
-  });
-
-  test('VULN DEMO: demonstrates user data exposure (opt-in)', async ({ page }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
-    
-    const idorPage = new IDORPage(page);
-    const results = await idorPage.testIDORVulnerability();
-    
-    // In vulnerable mode, demonstrate that user data is accessible
-    const exposedUsers = results.filter(r => r.hasUserData);
-    console.log(`WARNING: IDOR vulnerability exposed ${exposedUsers.length} user records`);
-    
-    const exposedSecrets = results.filter(r => r.hasSecretData);
-    if (exposedSecrets.length > 0) {
-      console.log(`WARNING: Secret data exposed for ${exposedSecrets.length} users`);
-    }
   });
 
   test('handles edge case user IDs', async ({ page }) => {

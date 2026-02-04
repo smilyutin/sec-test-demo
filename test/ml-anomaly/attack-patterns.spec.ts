@@ -1,15 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { uiTest as test, expect } from '../fixtures/ml-anomaly-fixtures';
 
 test.describe('Attack Pattern Detection - ML Anomaly Detection', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
-
   test('SQL Injection Attack Pattern', async ({ page }) => {
     // SQL injection payload contains abnormal characters
     const sqlPayload = "admin' OR '1'='1'--";
     
-    // Navigate to login form (already done in beforeEach)
+    // Navigate to login form (already done via autoGoto fixture)
     await expect(page.getByRole('heading', { name: 'SQL Injection' })).toBeVisible();
     
     // Enter SQL injection payload in username field

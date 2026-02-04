@@ -1,28 +1,18 @@
 import { test, expect } from '../fixtures/e2e-fixtures';
 
 test.describe('Search Functionality', () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.goto();
-  });
-
   test('search calls /api/search and renders results panel', async ({ searchPage }) => {
     await searchPage.searchAndValidateResponse('Laptop');
   });
 
-  test('SECURITY EXPECTATION: should not interpret user input as HTML (run in SECURE_MODE)', async ({ searchPage }) => {
-    test.skip(!process.env.SECURE_MODE, 'Run security expectations only after hardening (set SECURE_MODE=1)');
+  test.fixme('SECURITY EXPECTATION: should not interpret user input as HTML (run in SECURE_MODE)', async ({ searchPage }) => {
+    // EXPECTED FAILURE: This application is intentionally vulnerable for educational purposes.
+    // This test demonstrates secure behavior expected after XSS hardening.
+    console.log(' SECURITY EXPECTATION: Validating that user input is not interpreted as HTML');
 
     const sentinel = `<img src=x data-test="xss-sentinel">`;
     await searchPage.validateSecureSearch(sentinel);
     await searchPage.validateXSSPrevention(sentinel);
-  });
-
-  test('VULN DEMO: user input is rendered as HTML (opt-in)', async ({ searchPage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
-
-    const payload = '<strong>Bold Text</strong>';
-    await searchPage.performXSSSearch(payload);
-    await searchPage.validateXSSReflection(payload);
   });
 
   test('handles empty search query', async ({ searchPage }) => {

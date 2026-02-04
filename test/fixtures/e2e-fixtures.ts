@@ -11,9 +11,32 @@ interface E2EFixtures {
   searchPage: SearchPage;
   adminPage: AdminPage;
   registrationPage: RegistrationPage;
+
+  /**
+   * When enabled (default), each test starts by navigating to '/'.
+   * Disable via: test.use({ autoGoto: false }) in a describe/test.
+   */
+  autoGoto: boolean;
+  /** Internal auto-fixture that performs the navigation. */
+  gotoHome: void;
 }
 
 export const test = base.extend<E2EFixtures>({
+  autoGoto: [true, { option: true }],
+
+  gotoHome: [
+    async ({ page, autoGoto }, use) => {
+      if (autoGoto) {
+        const response = await page.goto('/');
+        expect(response?.status()).toBe(200);
+        await expect(page.getByRole('heading', { name: 'Security Testing Demo' })).toBeVisible();
+      }
+
+      await use(undefined);
+    },
+    { auto: true }
+  ],
+
   homePage: async ({ page }, use) => {
     const homePage = new HomePage(page);
     await use(homePage);

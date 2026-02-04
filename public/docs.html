@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Security Testing Demo</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        h1 { color: #333; }
+        .doc-links { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 15px; 
+            margin: 20px 0; 
+        }
+        .doc-card { 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 20px; 
+            text-decoration: none; 
+            color: inherit;
+            transition: box-shadow 0.2s;
+        }
+        .doc-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .doc-card h3 { margin-top: 0; color: #0066cc; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #0066cc; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Application</a>
+    
+    <h1>📋 Documentation</h1>
+    
+    <div class="doc-links">
+        <div class="doc-card" onclick="window.open('../README.md', '_blank')">
+            <h3>📖 Main README</h3>
+            <p>Complete setup guide, testing instructions, and project overview.</p>
+        </div>
+        
+        <div class="doc-card" onclick="window.open('../PROJECT_DOCS.md', '_blank')">
+            <h3>🏗️ Architecture Docs</h3>
+            <p>Technical architecture, testing framework, and CI/CD documentation.</p>
+        </div>
+        
+        <div class="doc-card" onclick="window.open('../QUICK_REFERENCE.md', '_blank')">
+            <h3>⚡ Quick Reference</h3>
+            <p>Essential commands, troubleshooting, and developer cheat sheet.</p>
+        </div>
+        
+        <div class="doc-card" onclick="window.open('../PRESENTATION_GUIDE.md', '_blank')">
+            <h3>🎯 Presentation Guide</h3>
+            <p>How to demonstrate this project and explain security concepts.</p>
+        </div>
+        
+        <div class="doc-card" onclick="window.location.href='test-dashboard.html'">
+            <h3>📊 Test Dashboard</h3>
+            <p>Interactive test results and reporting dashboard.</p>
+        </div>
+        
+        <div class="doc-card" onclick="window.open('../playwright-report/index.html', '_blank')">
+            <h3>🎭 Test Reports</h3>
+            <p>Detailed test execution results and traces.</p>
+        </div>
+    </div>
+    
+    <h2>🚀 Quick Start</h2>
+    <pre><code># Setup
+npm install && npx playwright install --with-deps
+
+# Run Tests
+npm test                    # All safe tests
+npm run test:ui            # Interactive test runner
+
+# View Reports  
+npm run test:report        # Generate Playwright report
+npm run test:allure-simple # Generate Allure-style report
+</code></pre>
+    
+    <h2>🔒 Security Testing Categories</h2>
+    <ul>
+        <li><strong>🟢 Baseline Tests</strong>: Always safe for CI/CD</li>
+        <li><strong>🟡 Security Validation</strong>: Post-hardening testing</li>
+        <li><strong>🔴 Vulnerability Demos</strong>: Educational exploitation (controlled environments only)</li>
+    </ul>
+    
+    <h2>📞 Support</h2>
+    <p>For questions or issues:</p>
+    <ul>
+        <li>Check the <a href="../QUICK_REFERENCE.md" target="_blank">Quick Reference</a> for common solutions</li>
+        <li>Review the <a href="../PROJECT_DOCS.md" target="_blank">detailed documentation</a></li>
+        <li>Create an issue on GitHub if you find bugs</li>
+    </ul>
+</body>
+</html>

@@ -69,6 +69,15 @@ export class LoginPage {
     await expect(this.loginResult).toContainText('error');
   }
 
+  async verifyLoginRejected() {
+    await expect(this.loginResult).toBeVisible();
+    await expect(this.loginResult).toContainText('error');
+    
+    // Ensure no token was stored for rejected login
+    const token = await this.getStoredToken();
+    expect(token, 'No token should be stored after rejected login').toBeFalsy();
+  }
+
   // Alias methods for backwards compatibility
   async verifyLoginResult() {
     return this.validateSuccessfulLogin();

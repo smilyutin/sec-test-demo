@@ -1,0 +1,119 @@
+name: "Security Testing"
+
+on:
+  push:
+    branches: 
+      - main
+      - develop
+  pull_request:
+    branches: 
+      - main
+  schedule:
+    # Run security tests daily at 2 AM UTC
+    - cron: "0 0 * * *"
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Set up Java (for Allure CLI)
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+      
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps chromium
+      
+    - name: Start application server
+      run: |
+        npm start &
+        sleep 10
+        curl --retry 10 --retry-connrefused http://localhost:3000
+      
+    - name: Run security tests
+      run: npx playwright test --project=chromium
+      env:
+        CI: true
+        
+    - name: Generate Allure Report
+      if: always()
+      run: |
+        npm run test:allure
+        
+    - name: Upload Playwright HTML Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-html-report
+        path: playwright-report/
+        retention-days: 30
+        
+    - name: Upload Allure Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-report
+        path: allure-report/
+        retention-days: 30
+        
+    - name: Upload Allure Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-results
+        path: allure-results/
+        retention-days: 30
+        
+    - name: Upload Test Results JSON
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-json
+        path: test-results.json
+        retention-days: 30
+        
+    - name: Upload test screenshots
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-results
+        path: test-results/
+        retention-days: 7
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'

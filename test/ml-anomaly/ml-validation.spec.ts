@@ -1,10 +1,6 @@
 import { test, expect } from '../fixtures/ml-anomaly-fixtures';
 
 test.describe('Machine Learning Model Validation - ML Anomaly Detection', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto('/');
-    });
-
     test('Feature Extraction Validation', async ({ mlValidator }) => {
         console.log('Validating feature extraction for ML models...');
 

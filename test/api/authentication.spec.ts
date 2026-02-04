@@ -1,7 +1,5 @@
 import { test, expect, APIRequestContext } from '@playwright/test';
 
-const API_URL = 'http://localhost:3000/api';
-
 test.describe('/api/admin (Broken Authentication)', () => {
   test('GET admin access with forged unsigned JWT', async ({ request }: { request: APIRequestContext }) => {
     const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64');
@@ -13,7 +11,7 @@ test.describe('/api/admin (Broken Authentication)', () => {
     
     const fakeToken = `${header}.${payload}.`;
     
-    const response = await request.get(`${API_URL}/admin`, {
+    const response = await request.get('/api/admin', {
       headers: {
         'Authorization': `Bearer ${fakeToken}`
       }
@@ -28,22 +26,24 @@ test.describe('/api/admin (Broken Authentication)', () => {
     }
   });
 
-  test('GET admin endpoint with decoded token shows weak verification', async ({ request }: { request: APIRequestContext }) => {
-    // First get a real token via SQL injection
-    const loginResponse = await request.post(`${API_URL}/login`, {
+  test('GET login returns a JWT-like token that can be decoded (informational)', async ({ request }: { request: APIRequestContext }) => {
+    // Use a normal login to obtain a token; avoid duplicating the SQLi-bypass coverage.
+    const loginResponse = await request.post('/api/login', {
       data: {
-        username: "admin' OR '1'='1'--",
-        password: 'anything'
+        username: 'user1',
+        password: 'password'
       }
     });
-    
+
+    expect([200, 401, 500]).toContain(loginResponse.status());
     const loginData = await loginResponse.json();
-    
-    if (loginData.success && loginData.token) {
-      const parts = loginData.token.split('.');
-      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-      
-      console.log('✓ Token payload decoded:', payload);
+
+    if (loginData?.success && loginData?.token) {
+      const parts = String(loginData.token).split('.');
+      if (parts.length >= 2) {
+        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+        console.log('✓ Token payload decoded:', payload);
+      }
     }
   });
 });

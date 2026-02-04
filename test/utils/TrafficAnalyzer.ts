@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import { sleep } from './sleep';
 
 export interface TrafficMetrics {
   baselineRate: number;
@@ -20,17 +21,17 @@ export interface RequestResult {
 }
 
 export class TrafficAnalyzer {
-  constructor(private page: Page) {}
+  constructor(private request: APIRequestContext) {}
 
   async generateTrafficBurst(requestCount: number = 20, delay: number = 25): Promise<{
     results: RequestResult[];
     metrics: TrafficMetrics;
   }> {
     const requestTypes = [
-      { name: 'config', fn: () => this.page.request.get('/api/config') },
-      { name: 'user', fn: () => this.page.request.get('/api/user/1') },
-      { name: 'search', fn: () => this.page.request.get('/api/search?q=test') },
-      { name: 'home', fn: () => this.page.request.get('/') }
+      { name: 'config', fn: () => this.request.get('/api/config') },
+      { name: 'user', fn: () => this.request.get('/api/user/1') },
+      { name: 'search', fn: () => this.request.get('/api/search?q=test') },
+      { name: 'home', fn: () => this.request.get('/') }
     ];
 
     const burstStart = Date.now();
@@ -53,7 +54,7 @@ export class TrafficAnalyzer {
           timestamp: requestEnd
         });
         
-        await this.page.waitForTimeout(delay);
+        await sleep(delay);
         
       } catch (error) {
         burstResults.push({

@@ -63,14 +63,14 @@ export class SearchPage {
   async validateXSSReflection(payload: string) {
     const resultHTML = await this.getSearchResultHTML();
     expect(resultHTML).toContain(payload);
-    console.log('✓ XSS payload reflected in DOM');
+    console.log('XSS payload reflected in DOM');
   }
 
   async validateXSSPrevention(payload: string) {
     // In secure mode, XSS should be prevented
     const xssElements = this.page.locator(`[data-test="xss-sentinel"]`);
     await expect(xssElements).toHaveCount(0);
-    console.log('✓ XSS payload properly sanitized');
+    console.log('XSS payload properly sanitized');
   }
 
   async testMultipleXSSVectors(vectors: string[]) {
@@ -89,7 +89,7 @@ export class SearchPage {
       });
       
       if (isReflected) {
-        console.log(`✓ XSS vector reflected: ${vector}`);
+        console.log(`XSS vector reflected: ${vector}`);
       }
     }
     

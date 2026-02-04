@@ -91,8 +91,8 @@ Focus on explaining risk and impact, not attack mechanics.
    - Explain how these tests fail until vulnerabilities are fixed
 
 4. **Test Structure Walkthrough**
-   - `test/api/` → API-level security tests
-   - `test/e2e/` → Browser-based attack validation
+   - `test/api/` - API-level security tests
+   - `test/e2e/` - Browser-based attack validation
    - Explain separation of concerns and scalability
 
 5. **Test Reports & Traces**

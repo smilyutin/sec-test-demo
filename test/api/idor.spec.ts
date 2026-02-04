@@ -1,10 +1,8 @@
 import { test, expect, APIRequestContext } from '@playwright/test';
 
-const API_URL = 'http://localhost:3000/api';
-
 test.describe('/api/user/:id (IDOR)', () => {
   test('GET user data without authentication', async ({ request }: { request: APIRequestContext }) => {
-    const response = await request.get(`${API_URL}/user/1`);
+    const response = await request.get('/api/user/1');
     expect(response.ok()).toBeTruthy();
     
     const userData = await response.json();
@@ -19,7 +17,7 @@ test.describe('/api/user/:id (IDOR)', () => {
     const users = [];
     
     for (let i = 1; i <= 5; i++) {
-      const response = await request.get(`${API_URL}/user/${i}`);
+      const response = await request.get(`/api/user/${i}`);
       
       if (response.ok()) {
         const userData = await response.json();
@@ -36,7 +34,7 @@ test.describe('/api/user/:id (IDOR)', () => {
   });
 
   test('GET admin user data without authorization', async ({ request }: { request: APIRequestContext }) => {
-    const response = await request.get(`${API_URL}/user/1`);
+    const response = await request.get('/api/user/1');
     const userData = await response.json();
     
     if (userData.role === 'admin') {

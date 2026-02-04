@@ -1,0 +1,94 @@
+name: "Deploy Allure Report to GitHub Pages"
+
+on:
+  workflow_run:
+    workflows: ["Security Testing"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy-allure-report:
+    if: github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    
+    # environment block removed because 'github-pages' is not a valid environment name
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download Allure Results
+      uses: actions/download-artifact@v4
+      with:
+        name: allure-results
+        path: allure-results
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        run-id: ${{ github.event.workflow_run.id }}
+        
+    - name: Download Previous Allure Report
+      uses: actions/download-artifact@v4
+      continue-on-error: true
+      with:
+        name: allure-report-history
+        path: allure-report/history
+        
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Install Allure CLI
+      run: |
+        wget -q https://github.com/allure-framework/allure2/releases/download/2.24.1/allure-2.24.1.tgz
+        tar -xzf allure-2.24.1.tgz
+        sudo mv allure-2.24.1 /opt/allure
+        sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
+        
+    - name: Generate Allure Report with History
+      run: |
+        mkdir -p allure-report
+        allure generate allure-results --clean -o allure-report
+        # Create a simple index.html for the root that redirects to the report
+        cat > allure-report/../index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Security Test Reports</title>
+            <meta http-equiv="refresh" content="0; url=./allure-report/index.html">
+        </head>
+        <body>
+            <h1>Security Test Reports</h1>
+            <p>Redirecting to <a href="./allure-report/index.html">Allure Report</a>...</p>
+        </body>
+        </html>
+        EOF
+        
+    - name: Upload Allure Report History
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-report-history
+        path: allure-report/history
+        retention-days: 90
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

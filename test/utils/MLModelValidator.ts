@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import { sleep } from './sleep';
 
 export interface MLModelMetrics {
   precision: number;
@@ -30,7 +31,7 @@ export interface ThresholdAnalysis {
 }
 
 export class MLModelValidator {
-  constructor(private page: Page) {}
+  constructor(private request: APIRequestContext) {}
 
   async validateFeatureEngineering(): Promise<FeatureValidation> {
     console.log('Validating ML feature engineering pipeline...');
@@ -51,7 +52,7 @@ export class MLModelValidator {
     for (const test of inputTests) {
       try {
         console.log(`Testing input processing: "${test.input}"`);
-        const response = await this.page.request.post('/api/ml/validate-input', {
+        const response = await this.request.post('/api/ml/validate-input', {
           data: { input: test.input }
         });
         
@@ -95,7 +96,7 @@ export class MLModelValidator {
     for (const requestStr of featureTests) {
       try {
         console.log(`Testing feature extraction: ${requestStr}`);
-        const response = await this.page.request.post('/api/ml/extract-features', {
+        const response = await this.request.post('/api/ml/extract-features', {
           data: { request: requestStr }
         });
         
@@ -130,7 +131,7 @@ export class MLModelValidator {
       console.log('Both input processing and feature extraction failed, trying fallback...');
       try {
         // Try a simple endpoint to see if server is responsive
-        const fallbackResponse = await this.page.request.get('/api/config');
+        const fallbackResponse = await this.request.get('/api/config');
         if (fallbackResponse.status() === 200) {
           console.log('Server is responsive, assuming ML components are working');
           inputProcessing = true;
@@ -176,7 +177,7 @@ export class MLModelValidator {
       
       for (const testCase of testCases) {
         try {
-          const response = await this.page.request.post('/api/ml/predict', {
+          const response = await this.request.post('/api/ml/predict', {
             data: { 
               input: testCase.input,
               threshold: threshold
@@ -200,7 +201,7 @@ export class MLModelValidator {
           else trueNegatives++;
         }
         
-        await this.page.waitForTimeout(10);
+        await sleep(10);
       }
       
       // Calculate metrics for this threshold
@@ -250,7 +251,7 @@ export class MLModelValidator {
     
     for (const testCase of testDataset) {
       try {
-        const response = await this.page.request.post('/api/ml/classify', {
+        const response = await this.request.post('/api/ml/classify', {
           data: { input: testCase.input }
         });
         
@@ -271,7 +272,7 @@ export class MLModelValidator {
         else trueNegatives++;
       }
       
-      await this.page.waitForTimeout(50);
+      await sleep(50);
     }
     
     // Calculate metrics
@@ -350,7 +351,7 @@ export class MLModelValidator {
       const requestStart = Date.now();
       
       try {
-        const response = await this.page.request.post('/api/ml/predict', {
+        const response = await this.request.post('/api/ml/predict', {
           data: { input }
         });
         const requestEnd = Date.now();
@@ -382,7 +383,7 @@ export class MLModelValidator {
     const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
     
     // Calculate throughput as successful requests per second
-    const throughput = successfulRequests / (totalTime / 1000);
+    const throughput = successfulRequests / (Math.max(totalTime, 1) / 1000);
     
     // Calculate scalability score based on success rate and performance
     const successRate = successfulRequests / testRequests;

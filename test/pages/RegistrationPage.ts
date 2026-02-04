@@ -88,6 +88,20 @@ export class RegistrationPage {
     return await this.registerUser(userData);
   }
 
+  /**
+   * Attempts to register a user with a specified role by manipulating the registration request.
+   * Used for testing business logic bypasses and role escalation vulnerabilities.
+   */
+  async attemptRoleEscalation(username: string, password: string, role: string) {
+    return await this.page.request.post('/api/Users', {
+      data: {
+        email: `${username}@test.local`,
+        password,
+        role
+      }
+    });
+  }
+
   async getRegistrationResult(): Promise<string> {
     await expect(this.registerResult).toBeVisible();
     return await this.registerResult.textContent() || '';
@@ -138,6 +152,6 @@ export class RegistrationPage {
   async validateSecureRegistration(attemptedRole: string, expectedRole: string = 'user') {
     // In secure mode, the server should ignore client-supplied roles
     await this.validateRoleAssignment(expectedRole);
-    console.log(`✓ Mass assignment prevented: attempted "${attemptedRole}", got "${expectedRole}"`);
+    console.log(`Mass assignment prevented: attempted "${attemptedRole}", got "${expectedRole}"`);
   }
 }

@@ -31,3 +31,24 @@ build/
 test-results/
 playwright-report/
 playwright/.cache/
+
+# Allure (generated)
+allure-results/
+allure-report/
+allure-report-simple/
+allure-report-complete/
+
+# Generated test summaries
+test-results.json
+
+# Playwright local artifacts
+.playwright/
+
+# Allure reports
+allure-report/
+allure-results/
+allure-report-simple/
+allure-report-complete/
+
+# Temporary files
+tmp/

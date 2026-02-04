@@ -91,7 +91,7 @@ export class IDORPage {
     const { hasSecretData } = await this.testSecretDataLeakage(userId);
     
     expect(hasSecretData).toBe(false);
-    console.log('✓ IDOR vulnerability fixed: secret_data not exposed');
+    console.log('IDOR vulnerability fixed: secret_data not exposed');
   }
 
   async enumerateUsers(startId: number = 1, endId: number = 10) {

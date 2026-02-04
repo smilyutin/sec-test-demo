@@ -1,10 +1,7 @@
-import { test, expect } from '../fixtures/e2e-fixtures';
+// OWASP Top 10 A02:2021 – Cryptographic Failures (Sensitive Data Exposure)
+import { test, expect } from '../fixtures/zap-fixtures';
 
 test.describe('Sensitive Data Exposure Testing', () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.goto();
-  });
-
   // -------------------------
   // BASELINE TESTS (always run)
   // -------------------------
@@ -27,8 +24,11 @@ test.describe('Sensitive Data Exposure Testing', () => {
   // SECURE_MODE=1 npx playwright test
   // --------------------------------------
 
-  test('SECURITY EXPECTATION: config endpoint should not expose secrets (run in SECURE_MODE)', async ({ homePage }) => {
-    test.skip(process.env.SECURE_MODE !== '1', 'Run security expectations only after hardening (set SECURE_MODE=1)');
+  test.fixme('SECURITY EXPECTATION: config endpoint should not expose secrets (run in SECURE_MODE)', async ({ homePage }) => {
+    // EXPECTED FAILURE: This application is intentionally vulnerable for educational purposes.
+    // This test demonstrates what SHOULD happen after security hardening - config endpoint should not expose secrets.
+    // Currently fails because secrets are intentionally exposed to demonstrate the vulnerability.
+    console.log(' SECURITY EXPECTATION: Validating that config endpoint does not expose secrets');
 
     await homePage.clickConfigButton();
     await homePage.verifyConfigResultVisible();
@@ -43,7 +43,7 @@ test.describe('Sensitive Data Exposure Testing', () => {
   // --------------------------------------
 
   test('VULN DEMO: config endpoint exposes secret key and API keys (opt-in)', async ({ homePage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+    console.log(' VULNERABILITY DEMO: Testing exposure of secret keys and API keys in config endpoint');
 
     await homePage.clickConfigButton();
     await homePage.verifyConfigResultVisible();
@@ -59,7 +59,7 @@ test.describe('Sensitive Data Exposure Testing', () => {
   });
 
   test('VULN DEMO: debug mode is visible (opt-in)', async ({ homePage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+    console.log(' VULNERABILITY DEMO: Testing visibility of debug mode configuration');
 
     await homePage.clickConfigButton();
     await homePage.verifyConfigResultVisible();
@@ -79,4 +79,5 @@ test.describe('Sensitive Data Exposure Testing', () => {
     expect(configData).toBeDefined();
     expect(typeof configData).toBe('object');
   });
+
 });

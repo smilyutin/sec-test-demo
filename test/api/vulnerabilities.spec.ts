@@ -1,36 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-const API_URL = 'http://localhost:3000/api';
-
-test.describe('/api/config (Sensitive Data Exposure)', () => {
-  test('GET configuration exposes sensitive data', async ({ request }) => {
-    const response = await request.get(`${API_URL}/config`);
-    expect(response.ok()).toBeTruthy();
-    
-    const config = await response.json();
-    
-    expect(config).toHaveProperty('secret_key');
-    expect(config).toHaveProperty('api_keys');
-    
-    console.log('✓ Sensitive configuration exposed:');
-    console.log('  Secret Key:', config.secret_key);
-    console.log('  Database:', config.database);
-    console.log('  API Keys:', config.api_keys);
-  });
-
-  test('GET configuration without authentication', async ({ request }) => {
-    const response = await request.get(`${API_URL}/config`);
-    
-    expect(response.ok()).toBeTruthy();
-    console.log('✓ Configuration accessible without authentication');
-  });
-});
-
 test.describe('/api/register (Mass Assignment)', () => {
   test('POST register with admin role escalation', async ({ request }) => {
     const username = `admin_${Date.now()}`;
     
-    const response = await request.post(`${API_URL}/register`, {
+    const response = await request.post('/api/register', {
       data: {
         username: username,
         password: 'password123',
@@ -44,7 +18,7 @@ test.describe('/api/register (Mass Assignment)', () => {
     expect(data.success).toBeTruthy();
     expect(data.role).toBe('admin');
     
-    console.log('✓ Mass assignment successful - Registered as admin');
+    console.log('Mass assignment successful - Registered as admin');
     console.log(`  User ID: ${data.userId}, Role: ${data.role}`);
   });
 
@@ -56,7 +30,7 @@ test.describe('/api/register (Mass Assignment)', () => {
     for (const role of roles) {
       const username = `user_${role}_${Date.now()}`;
       
-      const response = await request.post(`${API_URL}/register`, {
+      const response = await request.post('/api/register', {
         data: {
           username: username,
           password: 'test',
@@ -68,7 +42,7 @@ test.describe('/api/register (Mass Assignment)', () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log(`  ✓ Role "${role}": Success`);
+        console.log(`  Role "${role}": Success`);
       }
     }
   });

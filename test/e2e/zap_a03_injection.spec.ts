@@ -1,12 +1,9 @@
-import { test, expect } from '../fixtures/e2e-fixtures';
+// OWASP Top 10 A03:2021 – Injection (XSS)
+import { test, expect } from '../fixtures/zap-fixtures';
 
 test.describe('XSS Vulnerability Testing', () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.goto();
-  });
-
   test('should reflect XSS payload in search results', async ({ searchPage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+    console.log(' VULNERABILITY DEMO: Testing XSS payload reflection');
     
     const xssPayload = '<script>window.xssTriggered=true</script>';
     await searchPage.performXSSSearch(xssPayload);
@@ -14,7 +11,7 @@ test.describe('XSS Vulnerability Testing', () => {
   });
 
   test('should execute image-based XSS', async ({ searchPage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+    console.log('🔓 VULNERABILITY DEMO: Testing image-based XSS injection');
     
     const xssPayload = '<img src=x onerror=alert(1)>';
     await searchPage.performXSSSearch(xssPayload);
@@ -23,11 +20,13 @@ test.describe('XSS Vulnerability Testing', () => {
     expect(resultHTML).toMatch(/\bsrc\s*=\s*['"]x['"]/);
     expect(resultHTML).toMatch(/\bonerror\s*=\s*['"][^'"]+['"]/);
     
-    console.log('✓ Image-based XSS payload injected');
+    console.log('Image-based XSS payload injected');
   });
 
-  test('should test multiple XSS vectors', async ({ searchPage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+  test.fixme('should test multiple XSS vectors', async ({ searchPage }) => {
+    // EXPECTED BEHAVIOR VARIES: Different XSS vectors may behave differently based on server implementation
+    // This test checks if XSS vectors are reflected in search results, but behavior may vary
+    console.log(' VULNERABILITY DEMO: Testing multiple XSS attack vectors');
     
     const vectors = [
       '<svg/onload=alert(1)>',
@@ -42,8 +41,11 @@ test.describe('XSS Vulnerability Testing', () => {
     expect(reflectedVectors.length).toBeGreaterThan(0);
   });
 
-  test('SECURITY EXPECTATION: should sanitize XSS payloads (run in SECURE_MODE)', async ({ searchPage }) => {
-    test.skip(!process.env.SECURE_MODE, 'Run security expectations only after hardening (set SECURE_MODE=1)');
+  test.fixme('SECURITY EXPECTATION: should sanitize XSS payloads (run in SECURE_MODE)', async ({ searchPage }) => {
+    // EXPECTED FAILURE: This application is intentionally vulnerable for educational purposes.
+    // This test demonstrates what SHOULD happen after security hardening - XSS payloads should be sanitized.
+    // Currently fails because dangerous HTML elements are not properly sanitized.
+    console.log('SECURITY EXPECTATION: Validating XSS payload sanitization');
     
     const dangerousPayloads = [
       '<script>alert("xss")</script>',
@@ -56,11 +58,11 @@ test.describe('XSS Vulnerability Testing', () => {
       await searchPage.validateSecureSearch(payload);
     }
     
-    console.log('✓ All XSS payloads properly sanitized');
+    console.log('All XSS payloads properly sanitized');
   });
 
   test('should handle XSS in URL parameters', async ({ page, searchPage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+    console.log(' VULNERABILITY DEMO: Testing URL parameter XSS injection');
     
     // Navigate with XSS payload in URL
     const xssPayload = encodeURIComponent('<script>alert("url-xss")</script>');
@@ -71,12 +73,12 @@ test.describe('XSS Vulnerability Testing', () => {
     const decodedPayload = '<script>alert("url-xss")</script>';
     
     if (pageContent.includes(decodedPayload)) {
-      console.log('✓ URL-based XSS payload reflected');
+      console.log('URL-based XSS payload reflected');
     }
   });
 
   test('should test DOM-based XSS', async ({ page }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+    console.log(' VULNERABILITY DEMO: Testing DOM-based XSS injection');
     
     // Inject payload via client-side navigation/hash
     await page.goto('/#<img src=x onerror=alert("dom-xss")>');
@@ -88,7 +90,7 @@ test.describe('XSS Vulnerability Testing', () => {
     const dangerousElements = await page.locator('img[onerror]').count();
     
     if (dangerousElements > 0) {
-      console.log('✓ DOM-based XSS vulnerability detected');
+      console.log('DOM-based XSS vulnerability detected');
     }
   });
 

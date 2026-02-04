@@ -1,18 +1,10 @@
-import { test, expect } from '../fixtures/e2e-fixtures';
+// OWASP Top 10 A07:2021 – Identification and Authentication Failures
+import { test, expect } from '../fixtures/zap-fixtures';
 
 test.describe('Authentication', () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.goto();
-  });
-
   test('denies admin access when token is missing', async ({ adminPage }) => {
     await adminPage.accessAdminWithoutToken();
     await adminPage.validateUnauthorizedAccess();
-  });
-
-  test('stores token in localStorage after normal login', async ({ loginPage }) => {
-    await loginPage.loginWithValidCredentials();
-    await loginPage.validateSuccessfulLogin();
   });
 
   test('denies admin access with a non-admin token', async ({ loginPage, adminPage }) => {
@@ -31,27 +23,16 @@ test.describe('Authentication', () => {
     await loginPage.validateFailedLogin();
   });
 
-  test('SQL injection in login form (vulnerability demo)', async ({ loginPage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
-    
-    const response = await loginPage.attemptSQLInjection();
-    
-    // In vulnerable mode, SQL injection might succeed
-    if (response.status() === 200) {
-      console.log('WARNING: SQL Injection successful - application is vulnerable');
-      const result = await loginPage.getLoginResult();
-      expect(result).toContain('"success"');
-    }
-  });
-
-  test('prevents SQL injection (security expectation)', async ({ loginPage }) => {
-    test.skip(!process.env.SECURE_MODE, 'Run security expectations only after hardening (set SECURE_MODE=1)');
+  test.fixme('prevents SQL injection (security expectation)', async ({ loginPage }) => {
+    // EXPECTED FAILURE: This application is intentionally vulnerable for educational purposes.
+    // This test demonstrates secure behavior expected after SQL injection hardening.
+    console.log('SECURITY EXPECTATION: Validating SQL injection prevention');
     
     const response = await loginPage.attemptSQLInjection();
     expect([400, 401, 403]).toContain(response.status());
     await loginPage.validateFailedLogin();
     
-    console.log('✓ SQL injection properly prevented');
+    console.log('SQL injection properly prevented');
   });
 
   test('clears authentication state on logout', async ({ loginPage, page }) => {

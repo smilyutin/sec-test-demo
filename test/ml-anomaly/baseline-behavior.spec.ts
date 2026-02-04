@@ -1,15 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { uiTest as test, expect } from '../fixtures/ml-anomaly-fixtures';
 
 test.describe('Baseline Behavior Patterns - ML Anomaly Detection', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
-
   test('Normal User Authentication Flow', async ({ page }) => {
     // Record start time for baseline timing metrics
     const startTime = Date.now();
     
-    // Navigate to the home page (already done in beforeEach)
+    // Navigate to the home page (already done via autoGoto fixture)
     await expect(page).toHaveTitle('Security Testing Demo');
     
     // Fill username field with 'user1' - normal behavior pattern

@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import { sleep } from './sleep';
 
 export interface ErrorPatternAnalysis {
   baselineErrorRate: number;
@@ -20,7 +21,7 @@ export interface ErrorResult {
 }
 
 export class AttackPatternDetector {
-  constructor(private page: Page) {}
+  constructor(private request: APIRequestContext) {}
 
   async generateErrorPatterns(): Promise<{
     results: ErrorResult[];
@@ -71,9 +72,9 @@ export class AttackPatternDetector {
 
   private async establishBaseline(): Promise<ErrorResult[]> {
     const normalRequests = [
-      () => this.page.request.get('/api/user/1'),
-      () => this.page.request.post('/api/login', { data: { username: 'user1', password: 'password' } }),
-      () => this.page.request.get('/api/search?q=laptop')
+      () => this.request.get('/api/user/1'),
+      () => this.request.post('/api/login', { data: { username: 'user1', password: 'password' } }),
+      () => this.request.get('/api/search?q=laptop')
     ];
     
     const results: ErrorResult[] = [];
@@ -104,41 +105,41 @@ export class AttackPatternDetector {
   private async generateSystematicErrors(): Promise<ErrorResult[]> {
     const errorGeneratingRequests = [
       // 404 errors
-      () => this.page.request.get('/api/nonexistent'),
-      () => this.page.request.get('/api/user/999999'),
-      () => this.page.request.get('/admin/secret'),
-      () => this.page.request.get('/api/invalid/endpoint'),
+      () => this.request.get('/api/nonexistent'),
+      () => this.request.get('/api/user/999999'),
+      () => this.request.get('/admin/secret'),
+      () => this.request.get('/api/invalid/endpoint'),
       
       // 401 errors  
-      () => this.page.request.get('/api/admin'),
-      () => this.page.request.post('/api/login', { data: { username: 'invalid', password: 'wrong' } }),
-      () => this.page.request.get('/api/protected/resource'),
+      () => this.request.get('/api/admin'),
+      () => this.request.post('/api/login', { data: { username: 'invalid', password: 'wrong' } }),
+      () => this.request.get('/api/protected/resource'),
       
       // 400 errors
-      () => this.page.request.post('/api/login', { data: { malformed: 'json' } }),
-      () => this.page.request.post('/api/register', { data: {} }),
-      () => this.page.request.post('/api/user', { data: { invalid: 'data' } }),
+      () => this.request.post('/api/login', { data: { malformed: 'json' } }),
+      () => this.request.post('/api/register', { data: {} }),
+      () => this.request.post('/api/user', { data: { invalid: 'data' } }),
       
       // 422 errors (validation errors)
-      () => this.page.request.post('/api/register', { data: { email: 'invalid-email' } }),
-      () => this.page.request.put('/api/user/1', { data: { age: 'not-a-number' } }),
+      () => this.request.post('/api/register', { data: { email: 'invalid-email' } }),
+      () => this.request.put('/api/user/1', { data: { age: 'not-a-number' } }),
       
       // 405 Method Not Allowed errors
-      () => this.page.request.put('/api/login', { data: {} }),
-      () => this.page.request.delete('/api/search'),
+      () => this.request.put('/api/login', { data: {} }),
+      () => this.request.delete('/api/search'),
       
       // 403 Forbidden errors
-      () => this.page.request.get('/api/admin/users'),
-      () => this.page.request.delete('/api/admin/config'),
+      () => this.request.get('/api/admin/users'),
+      () => this.request.delete('/api/admin/config'),
       
       // 500 errors (potential)
-      () => this.page.request.get('/api/user/null'),
-      () => this.page.request.post('/api/login', { data: { username: null, password: undefined } }),
-      () => this.page.request.get('/api/search?q=' + 'x'.repeat(10000)),
+      () => this.request.get('/api/user/null'),
+      () => this.request.post('/api/login', { data: { username: null, password: undefined } }),
+      () => this.request.get('/api/search?q=' + 'x'.repeat(10000)),
       
       // Network errors
-      () => this.page.request.get('http://invalid-domain-that-does-not-exist.com/api'),
-      () => this.page.request.get('http://localhost:99999/api')
+      () => this.request.get('http://invalid-domain-that-does-not-exist.com/api'),
+      () => this.request.get('http://localhost:99999/api')
     ];
     
     const errorResults: ErrorResult[] = [];
@@ -166,7 +167,7 @@ export class AttackPatternDetector {
         });
       }
       
-      await this.page.waitForTimeout(50);
+      await sleep(50);
     }
     
     return errorResults;
@@ -221,7 +222,7 @@ export class AttackPatternDetector {
     for (const payload of sqlPayloads) {
       try {
         const startTime = Date.now();
-        const response = await this.page.request.post('/api/login', {
+        const response = await this.request.post('/api/login', {
           data: { username: payload, password: 'test' }
         });
         const endTime = Date.now();
@@ -249,7 +250,7 @@ export class AttackPatternDetector {
         }
       }
       
-      await this.page.waitForTimeout(100);
+      await sleep(100);
     }
     
     return {
@@ -281,7 +282,7 @@ export class AttackPatternDetector {
     for (const payload of xssPayloads) {
       try {
         // Test reflected XSS via search
-        const searchResponse = await this.page.request.get(`/api/search?q=${encodeURIComponent(payload)}`);
+        const searchResponse = await this.request.get(`/api/search?q=${encodeURIComponent(payload)}`);
         const searchText = await searchResponse.text();
         
         if (searchText.includes(payload) && !searchText.includes('&lt;')) {
@@ -290,13 +291,13 @@ export class AttackPatternDetector {
         
         // Test stored XSS via comment submission
         try {
-          const commentResponse = await this.page.request.post('/api/comment', {
+          const commentResponse = await this.request.post('/api/comment', {
             data: { comment: payload, productId: 1 }
           });
           
           if (commentResponse.status() === 200) {
             // Check if payload was stored
-            const getComments = await this.page.request.get('/api/comments/1');
+            const getComments = await this.request.get('/api/comments/1');
             const commentsText = await getComments.text();
             
             if (commentsText.includes(payload)) {
@@ -311,7 +312,7 @@ export class AttackPatternDetector {
         // Ignore search endpoint errors
       }
       
-      await this.page.waitForTimeout(100);
+      await sleep(100);
     }
     
     return {

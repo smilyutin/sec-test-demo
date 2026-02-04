@@ -14,30 +14,69 @@ interface MLAnomalyFixtures {
 }
 
 export const test = base.extend<MLAnomalyFixtures>({
-  anomalyAPI: async ({ page }, use) => {
-    const api = new AnomalyDetectionAPI(page);
+  anomalyAPI: async ({ request }, use) => {
+    const api = new AnomalyDetectionAPI(request);
     await use(api);
   },
 
-  trafficAnalyzer: async ({ page }, use) => {
-    const analyzer = new TrafficAnalyzer(page);
+  trafficAnalyzer: async ({ request }, use) => {
+    const analyzer = new TrafficAnalyzer(request);
     await use(analyzer);
   },
 
-  behaviorAnalyzer: async ({ page }, use) => {
-    const analyzer = new BehaviorAnalyzer(page);
+  behaviorAnalyzer: async ({ request }, use) => {
+    const analyzer = new BehaviorAnalyzer(request);
     await use(analyzer);
   },
 
-  attackPatternDetector: async ({ page }, use) => {
-    const detector = new AttackPatternDetector(page);
+  attackPatternDetector: async ({ request }, use) => {
+    const detector = new AttackPatternDetector(request);
     await use(detector);
   },
 
-  mlValidator: async ({ page }, use) => {
-    const validator = new MLModelValidator(page);
+  mlValidator: async ({ request }, use) => {
+    const validator = new MLModelValidator(request);
     await use(validator);
   }
+});
+
+export const uiTest = base.extend<MLAnomalyFixtures & { autoGoto: boolean }>({
+  autoGoto: [true, { option: true }],
+
+  anomalyAPI: async ({ request }, use) => {
+    const api = new AnomalyDetectionAPI(request);
+    await use(api);
+  },
+
+  trafficAnalyzer: async ({ request }, use) => {
+    const analyzer = new TrafficAnalyzer(request);
+    await use(analyzer);
+  },
+
+  behaviorAnalyzer: async ({ request }, use) => {
+    const analyzer = new BehaviorAnalyzer(request);
+    await use(analyzer);
+  },
+
+  attackPatternDetector: async ({ request }, use) => {
+    const detector = new AttackPatternDetector(request);
+    await use(detector);
+  },
+
+  mlValidator: async ({ request }, use) => {
+    const validator = new MLModelValidator(request);
+    await use(validator);
+  },
+
+  _autoGoto: [
+    async ({ page, autoGoto }, use) => {
+      if (autoGoto) {
+        await page.goto('/');
+      }
+      await use();
+    },
+    { auto: true }
+  ]
 });
 
 export { expect };

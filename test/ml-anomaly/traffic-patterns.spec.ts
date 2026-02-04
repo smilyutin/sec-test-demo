@@ -1,10 +1,6 @@
 import { test, expect } from '../fixtures/ml-anomaly-fixtures';
 
 test.describe('Traffic Pattern Analysis - ML Anomaly Detection', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
-
   test('Request Volume Anomalies', async ({ trafficAnalyzer, anomalyAPI }) => {
     console.log('Testing request volume anomalies...');
     

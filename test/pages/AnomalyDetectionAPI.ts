@@ -1,7 +1,8 @@
-import { Page } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import { sleep } from '../utils/sleep';
 
 export class AnomalyDetectionAPI {
-  constructor(private page: Page) {}
+  constructor(private request: APIRequestContext) {}
 
   async makeRequest(endpoint: string, options?: { method?: string; data?: any; headers?: Record<string, string> }) {
     const { method = 'GET', data, headers } = options || {};
@@ -9,12 +10,12 @@ export class AnomalyDetectionAPI {
     const requestStart = Date.now();
     try {
       const response = method === 'POST' 
-        ? await this.page.request.post(endpoint, { data, headers })
+        ? await this.request.post(endpoint, { data, headers })
         : method === 'PUT'
-        ? await this.page.request.put(endpoint, { data, headers })
+        ? await this.request.put(endpoint, { data, headers })
         : method === 'DELETE'
-        ? await this.page.request.delete(endpoint, { headers })
-        : await this.page.request.get(endpoint, { headers });
+        ? await this.request.delete(endpoint, { headers })
+        : await this.request.get(endpoint, { headers });
       
       const requestEnd = Date.now();
       
@@ -48,7 +49,7 @@ export class AnomalyDetectionAPI {
       });
       
       if (delay > 0) {
-        await this.page.waitForTimeout(delay);
+        await sleep(delay);
       }
     }
     
@@ -68,7 +69,7 @@ export class AnomalyDetectionAPI {
           ...result
         });
       }
-      await this.page.waitForTimeout(1000); // Normal human delay
+      await sleep(1000); // Normal human delay
     }
     
     const totalTime = Date.now() - startTime;

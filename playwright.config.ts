@@ -1,5 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const APP_BASE_URL = process.env.STAGING_URL || 'http://localhost:3000';
+const USE_EXTERNAL_SERVER = !!process.env.STAGING_URL;
+
+// Check if allure-playwright is available
+let hasAllureReporter = false;
+try {
+  require.resolve('allure-playwright');
+  hasAllureReporter = true;
+} catch (e) {
+  console.warn('allure-playwright not installed. Install it with: npm install allure-playwright allure-commandline');
+}
+
 export default defineConfig({
   globalSetup: './test/global-setup',
   globalTeardown: './test/global-teardown',
@@ -9,7 +21,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: process.env.CI ? 'blob' : [['html'], ['json', { outputFile: 'test-results.json' }], ['list']],
+  reporter: process.env.CI 
+    ? hasAllureReporter 
+      ? [['blob'], ['allure-playwright', { outputFolder: 'allure-results', suiteTitle: 'Security Testing Suite' }], ['json', { outputFile: 'test-results.json' }]]
+      : [['blob'], ['json', { outputFile: 'test-results.json' }]]
+    : hasAllureReporter
+      ? [['html'], ['json', { outputFile: 'test-results.json' }], ['list'], ['allure-playwright', { outputFolder: 'allure-results', suiteTitle: 'Security Testing Suite' }]]
+      : [['html'], ['json', { outputFile: 'test-results.json' }], ['list']],
 
   outputDir: './test-results',
 
@@ -24,7 +42,7 @@ export default defineConfig({
       name: 'api',
       testMatch: '**/api/**/*.spec.ts',
       use: {
-        baseURL: 'http://localhost:3000',
+        baseURL: APP_BASE_URL,
         trace: 'off',
         screenshot: 'off',
         video: 'off',
@@ -35,7 +53,7 @@ export default defineConfig({
       testMatch: '**/e2e/**/*.spec.ts',
       use: { 
         ...devices['Desktop Chrome'],
-        baseURL: 'http://localhost:3000',
+        baseURL: APP_BASE_URL,
         trace: 'off',
         screenshot: 'off',
         video: 'off',
@@ -46,7 +64,7 @@ export default defineConfig({
       testMatch: '**/ml-anomaly/**/*.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://localhost:3000',
+        baseURL: APP_BASE_URL,
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
@@ -56,12 +74,15 @@ export default defineConfig({
         tags: ['ml', 'anomaly-detection', 'security']
       },
     },
+    
   ],
 
-  webServer: {
-    command: 'npm start',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  webServer: USE_EXTERNAL_SERVER
+    ? undefined
+    : {
+        command: 'npm start',
+        url: APP_BASE_URL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000,
+      },
 });

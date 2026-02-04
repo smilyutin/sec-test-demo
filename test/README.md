@@ -12,7 +12,8 @@ test/
 ├── seed.spec.ts                 # Test data initialization and seeding
 ├── fixtures/                    # Shared test infrastructure
 │   ├── e2e-fixtures.ts         # Browser-based test fixtures and utilities
-│   └── ml-anomaly-fixtures.ts  # ML anomaly detection test fixtures
+│   ├── ml-anomaly-fixtures.ts  # ML anomaly detection test fixtures
+│   └── zap-fixtures.ts         # ZAP suite fixtures and payload helpers
 ├── pages/                       # Page Object Model (POM) classes
 │   ├── HomePage.ts             # Homepage navigation and interactions
 │   ├── LoginPage.ts            # Authentication flows and login
@@ -32,15 +33,23 @@ test/
 │   ├── idor.spec.ts           # Insecure Direct Object Reference tests
 │   └── vulnerabilities.spec.ts # Combined API vulnerability validation
 ├── e2e/                         # Browser-based security tests (realistic scenarios)
-│   ├── authentication.spec.ts # Browser-based authentication flows and bypasses
 │   ├── home.spec.ts           # Homepage functionality and smoke tests
-│   ├── idor.spec.ts           # IDOR vulnerabilities via browser interface
 │   ├── login.safe.spec.ts     # Safe login functionality (baseline)
 │   ├── registration.spec.ts   # User registration, validation, and mass assignment
-│   ├── search.spec.ts         # Search functionality with XSS demonstrations
-│   ├── sensitiveData.spec.ts  # Sensitive data exposure testing
-│   ├── vulnerabilities.spec.ts # Chained exploit demonstrations
-│   └── xss.spec.ts            # Cross-site scripting attack validation
+│   ├── search.spec.ts         # Search baseline + secure expectations + opt-in DOM XSS demo
+│   ├── vulnerabilities.spec.ts # Placeholder (chain moved; spec is skipped)
+│   ├── zap_a01_broken_access_control.spec.ts      # OWASP A01
+│   ├── zap_a02_cryptographic_failures.spec.ts     # OWASP A02 (config exposure)
+│   ├── zap_a03_injection.spec.ts                  # OWASP A03 (XSS)
+│   ├── zap_a03_sql_injection.spec.ts             # OWASP A03 (SQLi)
+│   ├── zap_a04_insecure_design.spec.ts           # OWASP A04
+│   ├── zap_a05_security_misconfiguration.spec.ts # OWASP A05
+│   ├── zap_a06_vulnerable_components.spec.ts     # OWASP A06
+│   ├── zap_a07_identification_authentication_failures.spec.ts # OWASP A07
+│   ├── zap_a08_software_data_integrity_failures.spec.ts       # OWASP A08
+│   ├── zap_a09_security_logging_monitoring_failures.spec.ts   # OWASP A09
+│   ├── zap_a10_server_side_request_forgery.spec.ts           # OWASP A10
+│   └── zap_workflow_chain.spec.ts # Canonical chained workflow demo (single scenario)
 └── ml-anomaly/                  # ML-enhanced security testing
     ├── attack-patterns.spec.ts    # ML-based attack pattern detection
     ├── baseline-behavior.spec.ts  # Normal user behavior pattern establishment
@@ -114,15 +123,16 @@ npm run test:report
 # === SECURITY TESTING (CONTROLLED ENVIRONMENTS ONLY) ===
 # Run vulnerability demonstrations (NEVER in CI)
 npm run test:vuln
-# Equivalent to: RUN_VULN_TESTS=1 npx playwright test
+# Equivalent to: RUN_VULN_TESTS=1 npm test
 
 # Run security expectation tests (post-hardening validation)
 npm run test:secure
-# Equivalent to: SECURE_MODE=1 npx playwright test
+# Equivalent to: SECURE_MODE=1 npm test
 
 # === TARGETED TEST EXECUTION ===
 # Run specific test suites
-npx playwright test test/e2e/authentication.spec.ts
+npx playwright test test/e2e/login.safe.spec.ts
+npx playwright test test/e2e/zap_a03_sql_injection.spec.ts
 npx playwright test test/api/idor.spec.ts
 npx playwright test test/ml-anomaly/
 
@@ -222,6 +232,7 @@ Assertions for *secure behavior*. These are expected to fail until the applicati
 
 ```bash
 npm run test:secure
+# or: SECURE_MODE=1 npm test
 ```
 
 Enabled by:
@@ -238,34 +249,31 @@ Intentional exploit demonstrations and chained attacks.
 
 ```bash
 npm run test:vuln
+# or: RUN_VULN_TESTS=1 npm test
 ```
 
 Enabled by:
 - `RUN_VULN_TESTS=1`
 
-**CI Safety**: These exploit tests are **never run automatically in CI**. The GitHub Actions workflow intentionally omits `RUN_VULN_TESTS=1` to prevent accidental execution of exploit code in automated environments.
-
-> WARNING: These tests are skipped by default and never run automatically in CI.
+**CI Safety**: The most explicit exploit-style demos are guarded behind `RUN_VULN_TESTS=1`. CI should run only baseline suites unless you intentionally opt-in.
 
 ## Test Categories
 
 ### API Tests (test/api/)
 Direct HTTP requests to test API vulnerabilities:
-- **login.spec.ts** - SQL injection & authentication API tests
-- **idor.spec.ts** - IDOR API tests
-- **authentication.spec.ts** - JWT verification weaknesses
-- **sensitiveData.spec.ts** - Config and secret exposure tests
+- **api.spec.ts** - `/api/search` injection probing (SQLi-style payload)
+- **idor.spec.ts** - IDOR and user enumeration (`/api/user/:id`)
+- **authentication.spec.ts** - Broken JWT verification / forged token access (`/api/admin`)
+- **vulnerabilities.spec.ts** - Mass assignment role escalation (`/api/register`)
 
 ### E2E Tests (test/e2e/)
 Browser-based tests for UI vulnerabilities:
 - **home.spec.ts** - Smoke and UI wiring tests
-- **login.spec.ts** - Login baseline and SQL injection demonstration
-- **search.spec.ts** - Search baseline and XSS demonstration
-- **idor.spec.ts** - IDOR baseline and demonstration
-- **authentication.spec.ts** - Broken authentication via UI
+- **login.safe.spec.ts** - Normal login flows + token storage baseline
+- **search.spec.ts** - Search baseline + secure expectations + opt-in DOM XSS demo
 - **registration.spec.ts** - Mass assignment baseline and demonstration
-- **sensitiveData.spec.ts** - Config exposure baseline and demonstration
-- **vulnerabilities.spec.ts** - Full exploit chains (opt-in only)
+- **zap_* suites** - Canonical OWASP Top 10 vulnerability demos and expectations
+- **zap_workflow_chain.spec.ts** - Single canonical chained workflow demo
 
 ## CI/CD Integration Strategy
 
@@ -352,7 +360,7 @@ unset RUN_VULN_TESTS
 npm run test:e2e  # Now runs safely
 
 # Validating security fixes
-SECURE_MODE=1 npm run test:secure
+npm run test:secure
 ```
 
 ### Debug Mode Options

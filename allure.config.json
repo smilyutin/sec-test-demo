@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "allure.results.directory": "allure-results",
+    "allure.link.pattern": "https://github.com/owner/repo/issues/{}",
+    "allure.link.tms.pattern": "https://github.com/owner/repo/issues/{}",
+    "allure.link.issue.pattern": "https://github.com/owner/repo/issues/{}"
+  },
+  "categories": [
+    {
+      "name": "Ignored tests", 
+      "matchedStatuses": ["skipped"]
+    },
+    {
+      "name": "Infrastructure problems",
+      "matchedStatuses": ["broken", "failed"],
+      "messageRegex": ".*timeout.*"
+    },
+    {
+      "name": "Outdated tests",
+      "matchedStatuses": ["broken"],
+      "traceRegex": ".*FileNotFoundException.*"
+    },
+    {
+      "name": "Product defects",
+      "matchedStatuses": ["failed"]
+    }
+  ],
+  "environment": {
+    "Stand": "Local",
+    "Browser": "Chrome",
+    "Branch": "main"
+  }
+}

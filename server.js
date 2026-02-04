@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const Database = require('better-sqlite3');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
@@ -14,6 +15,29 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static('public'));
+
+// Serve generated test artifacts (reports/results) for the dashboard.
+// These live outside /public, so we mount them explicitly when present.
+function mountStaticIfExists(route, dirPath) {
+  try {
+    if (fs.existsSync(dirPath)) {
+      app.use(route, express.static(dirPath));
+    }
+  } catch (e) {
+    // Ignore FS errors; app should still start.
+  }
+}
+
+mountStaticIfExists('/playwright-report', path.join(__dirname, 'playwright-report'));
+mountStaticIfExists('/allure-report', path.join(__dirname, 'allure-report'));
+mountStaticIfExists('/allure-report-complete', path.join(__dirname, 'allure-report-complete'));
+mountStaticIfExists('/allure-report-simple', path.join(__dirname, 'allure-report-simple'));
+
+app.get('/test-results.json', (req, res) => {
+  const filePath = path.join(__dirname, 'test-results.json');
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'test-results.json not found' });
+  res.sendFile(filePath);
+});
 
 // Initialize SQLite database
 const db = new Database(':memory:');
@@ -84,7 +108,8 @@ app.post('/api/login', (req, res) => {
       res.status(401).json({ error: 'Invalid credentials' });
     }
   } catch (err) {
-    res.status(500).json({ error: 'Database error', details: err.message });
+    // Generic error message to prevent information disclosure
+    res.status(500).json({ error: 'Authentication failed' });
   }
 });
 // 2. XSS VULNERABILITY (Example endpoint)
@@ -98,7 +123,8 @@ app.get('/api/search', (req, res) => {
       message: `Search results for: ${searchTerm}`
     });
   } catch (err) {
-    res.status(500).json({ error: 'Search error', details: err.message });
+    // Generic error message to prevent information disclosure  
+    res.status(500).json({ error: 'Search failed' });
   }
 });
 
@@ -120,7 +146,7 @@ app.get('/api/user/:id', (req, res) => {
       res.status(404).json({ error: 'User not found' });
     }
   } catch (err) {
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Service unavailable' });
   }
 });
 // 4. BROKEN AUTHENTICATION - Weak JWT verification
@@ -375,6 +401,126 @@ app.post('/api/ml/classify', (req, res) => {
       attack: prediction === 'attack' ? confidence : 1 - confidence
     },
     timestamp: Date.now()
+  });
+});
+
+// 7. ORDER PROCESSING ENDPOINT
+app.post('/api/order', (req, res) => {
+  const { items, total } = req.body;
+  
+  // Validate order data
+  if (!items || !Array.isArray(items)) {
+    return res.status(400).json({ error: 'Invalid items array' });
+  }
+  
+  if (items.length === 0) {
+    return res.status(400).json({ error: 'Order cannot be empty' });
+  }
+  
+  if (typeof total !== 'number' || total < 0) {
+    return res.status(400).json({ error: 'Invalid total amount' });
+  }
+  
+  // Check for suspicious negative quantities
+  const hasNegativeQuantity = items.some(item => item.quantity < 0);
+  if (hasNegativeQuantity) {
+    return res.status(422).json({ error: 'Negative quantities not allowed' });
+  }
+  
+  // Check for negative pricing
+  if (total < 0) {
+    return res.status(422).json({ error: 'Negative total not allowed' });
+  }
+  
+  res.json({ 
+    success: true, 
+    orderId: Math.floor(Math.random() * 10000),
+    total,
+    status: 'pending'
+  });
+});
+
+// 8. USER UPDATE ENDPOINT
+app.post('/api/user/update', (req, res) => {
+  const { id, role } = req.body;
+  
+  // Validate user ID
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+  
+  // Prevent privilege escalation
+  if (role && ['admin', 'super-admin', 'root'].includes(role)) {
+    return res.status(403).json({ error: 'Insufficient privileges to assign admin role' });
+  }
+  
+  // Check if user exists
+  try {
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'User updated successfully',
+      userId: id
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Update failed' });
+  }
+});
+
+// 9. DISCOUNT SYSTEM ENDPOINT
+app.post('/api/discount', (req, res) => {
+  const { code, discount } = req.body;
+  
+  // Validate discount code
+  if (!code || typeof code !== 'string') {
+    return res.status(400).json({ error: 'Invalid discount code' });
+  }
+  
+  // Validate discount amount
+  if (typeof discount !== 'number' || discount < 0 || discount > 100) {
+    return res.status(422).json({ error: 'Invalid discount amount (0-100%)' });
+  }
+  
+  // Prevent excessive discounts
+  if (discount > 50) {
+    return res.status(422).json({ error: 'Discount exceeds maximum allowed (50%)' });
+  }
+  
+  res.json({ 
+    success: true, 
+    code,
+    discount,
+    message: 'Discount applied successfully'
+  });
+});
+
+// 10. DISCOUNT APPLICATION ENDPOINT
+app.post('/api/apply-discount', (req, res) => {
+  const { code, cartTotal } = req.body;
+  
+  if (!code || typeof cartTotal !== 'number') {
+    return res.status(400).json({ error: 'Invalid request data' });
+  }
+  
+  // Simple discount validation
+  const validCodes = { 'SAVE10': 10, 'SAVE20': 20 };
+  
+  if (!validCodes[code]) {
+    return res.status(404).json({ error: 'Invalid discount code' });
+  }
+  
+  const discount = validCodes[code];
+  const newTotal = cartTotal * (1 - discount / 100);
+  
+  res.json({ 
+    success: true,
+    originalTotal: cartTotal,
+    discount,
+    newTotal: Math.round(newTotal * 100) / 100
   });
 });
 

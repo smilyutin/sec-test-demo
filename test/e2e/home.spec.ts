@@ -1,10 +1,6 @@
 import { test, expect } from '../fixtures/e2e-fixtures';
 
 test.describe('Home Page', () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.goto();
-  });
-
   test('loads successfully with no console errors', async ({ homePage }) => {
     const consoleErrors = await homePage.checkConsoleErrors();
     
@@ -39,7 +35,7 @@ test.describe('Home Page', () => {
     
     console.log(`Page loaded in ${loadTime}ms`);
     const html = await page.content();
-    expect(html).toContain('Demonstrating OWASP Top 10 Vulnerabilities');
+    expect(html).toContain('Educational Vulnerability Testing Platform');
   });
 
 });

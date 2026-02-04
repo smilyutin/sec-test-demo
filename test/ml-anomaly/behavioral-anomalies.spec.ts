@@ -1,10 +1,6 @@
-import { test, expect } from '../fixtures/ml-anomaly-fixtures';
+import { uiTest as test, expect } from '../fixtures/ml-anomaly-fixtures';
 
 test.describe('Behavioral Anomaly Detection - ML Anomaly Detection', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
-
   test('Unusual Navigation Patterns', async ({ behaviorAnalyzer }) => {
     const anomalyIndicators = await behaviorAnalyzer.detectUnusualNavigation();
     

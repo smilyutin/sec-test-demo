@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
+import { sleep } from './sleep';
 
 export interface BehaviorAnomalyIndicators {
   directApiAccess: boolean;
@@ -21,20 +22,20 @@ export interface AutomatedToolSignature {
 }
 
 export class BehaviorAnalyzer {
-  constructor(private page: Page) {}
+  constructor(private request: APIRequestContext) {}
 
   async detectUnusualNavigation(): Promise<BehaviorAnomalyIndicators> {
     console.log('Testing unusual navigation patterns...');
     
     // Access sensitive endpoints directly without normal user flow
-    const configResponse = await this.page.request.get('/api/config');
+    const configResponse = await this.request.get('/api/config');
     console.log('Direct API access to /api/config without UI interaction');
     
     const headers = configResponse.headers();
     console.log('Request headers for direct API access:', Object.keys(headers));
     
     // Skip normal authentication flow and access user data directly
-    const userResponse = await this.page.request.get('/api/user/1');
+    const userResponse = await this.request.get('/api/user/1');
     console.log('Direct access to user endpoint bypassing authentication UI');
     
     return {
@@ -67,7 +68,7 @@ export class BehaviorAnalyzer {
       const requestStart = Date.now();
       
       try {
-        const response = await this.page.request.get(endpoint);
+        const response = await this.request.get(endpoint);
         const requestEnd = Date.now();
         
         requestResults.push({
@@ -78,7 +79,7 @@ export class BehaviorAnalyzer {
         });
         
         // Minimal delay - typical of automated tools
-        await this.page.waitForTimeout(10);
+        await sleep(10);
         
       } catch (error) {
         requestResults.push({
@@ -117,16 +118,16 @@ export class BehaviorAnalyzer {
   }> {
     // Simulate simultaneous session access
     const sessionPromises = [
-      this.page.request.get('/api/user/1'),
-      this.page.request.get('/api/user/1'),
-      this.page.request.get('/api/user/1')
+      this.request.get('/api/user/1'),
+      this.request.get('/api/user/1'),
+      this.request.get('/api/user/1')
     ];
     
     const responses = await Promise.all(sessionPromises);
     const allSuccessful = responses.every(r => r.status() === 200);
     
     // Check for missing session context
-    const contextResponse = await this.page.request.get('/api/user/1');
+    const contextResponse = await this.request.get('/api/user/1');
     const hasSessionHeaders = Object.keys(contextResponse.headers()).some(h => 
       h.toLowerCase().includes('session') || h.toLowerCase().includes('auth')
     );

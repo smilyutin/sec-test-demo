@@ -1,10 +1,6 @@
 import { test, expect } from '../fixtures/e2e-fixtures';
 
 test.describe('User Registration', () => {
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.goto();
-  });
-
   // -------------------------
   // BASELINE TESTS (always run)
   // -------------------------
@@ -38,7 +34,7 @@ test.describe('User Registration', () => {
   // --------------------------------------
 
   test('VULN DEMO: accepts arbitrary role from client (opt-in)', async ({ registrationPage }) => {
-    test.skip(!process.env.RUN_VULN_TESTS, 'Vulnerability demos are opt-in (set RUN_VULN_TESTS=1)');
+    console.log(' VULNERABILITY DEMO: Testing acceptance of arbitrary role from client');
 
     const username = `vuln_role_${Date.now()}`;
     
