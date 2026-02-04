@@ -82,7 +82,9 @@ export default defineConfig({
     : {
         command: 'npm start',
         url: APP_BASE_URL,
-        reuseExistingServer: !process.env.CI,
+        // In CI we may start the server in the workflow (health checks, etc.).
+        // Reuse it if it's already listening to avoid port-in-use failures.
+        reuseExistingServer: true,
         timeout: 120 * 1000,
       },
 });
