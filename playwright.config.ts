@@ -23,8 +23,8 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI 
     ? hasAllureReporter 
-      ? [['blob'], ['allure-playwright', { outputFolder: 'allure-results', suiteTitle: 'Security Testing Suite' }], ['json', { outputFile: 'test-results.json' }]]
-      : [['blob'], ['json', { outputFile: 'test-results.json' }]]
+      ? [['html', { open: 'never' }], ['allure-playwright', { outputFolder: 'allure-results', suiteTitle: 'Security Testing Suite' }], ['json', { outputFile: 'test-results.json' }]]
+      : [['html', { open: 'never' }], ['json', { outputFile: 'test-results.json' }]]
     : hasAllureReporter
       ? [['html'], ['json', { outputFile: 'test-results.json' }], ['list'], ['allure-playwright', { outputFolder: 'allure-results', suiteTitle: 'Security Testing Suite' }]]
       : [['html'], ['json', { outputFile: 'test-results.json' }], ['list']],
