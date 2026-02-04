@@ -121,7 +121,7 @@ npm run test:allure-simple    # Generate simple report
 
 - **Main Guide**: [README.md](README.md)
 - **Architecture**: [PROJECT_DOCS.md](PROJECT_DOCS.md)
-- **Security Coverage**: [test/security/OWASP_TOP10_COVERAGE.md](test/security/OWASP_TOP10_COVERAGE.md)
+- **Security Coverage**: [OWASP_TOP10_COVERAGE.md](OWASP_TOP10_COVERAGE.md)
 - **Presentation Guide**: [PRESENTATION_GUIDE.md](PRESENTATION_GUIDE.md)
 
 ---
