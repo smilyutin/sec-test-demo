@@ -21,6 +21,7 @@
     "test:comprehensive": "playwright test --project=api --project=chromium --project=ml-anomaly",
     "test:report": "npx playwright show-report",
     "test:allure": "npm test",
+    "allure:generate": "node check-java-allure.js \"npx allure generate allure-results --clean -o allure-report\"",
     "test:allure-open": "node check-java-allure.js \"npx allure open allure-report\"",
     "test:allure-serve": "node check-java-allure.js \"npx allure serve allure-results\"",
     "test:allure-simple": "node generate-simple-report.js",

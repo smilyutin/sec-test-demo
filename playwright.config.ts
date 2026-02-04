@@ -54,9 +54,10 @@ export default defineConfig({
       use: { 
         ...devices['Desktop Chrome'],
         baseURL: APP_BASE_URL,
-        trace: 'off',
-        screenshot: 'off',
-        video: 'off',
+        // In CI, keep artifacts on failures so we have something useful to upload/debug.
+        trace: process.env.CI ? 'retain-on-failure' : 'off',
+        screenshot: process.env.CI ? 'only-on-failure' : 'off',
+        video: process.env.CI ? 'retain-on-failure' : 'off',
       },
     },
     {
